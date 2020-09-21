@@ -1,9 +1,14 @@
 #include "main.h"
 
-void drawCube(Vec3 pos) {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void initParticles() {
+    for (int i = 0; i < mMaxNumParticles; i++) {
+        Vec3 pos = Vec3(rand() % 10 - 5.f, rand() % 10 - 5.f, rand() % 10 - 12.f);
+        Vec3 color = Vec3(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+        mParticles.push_back(new Particle(pos, mParticleRadius, color));
+    }
+}
 
-	glMatrixMode(GL_MODELVIEW);
+void drawCube(Vec3 pos) {
 	// Render a color-cube consisting of 6 quads with different colors
 	glLoadIdentity();
 	glTranslatef(pos.x(), pos.y(), pos.z());
@@ -51,12 +56,22 @@ void drawCube(Vec3 pos) {
     glVertex3f(1.0f, -1.0f, 1.0f);
     glVertex3f(1.0f, -1.0f, -1.0f);
     glEnd();  // End of drawing color-cube
+}
 
-    glutSwapBuffers();
+void drawParticles() {
+    for (auto it : mParticles) {
+        it->draw();
+    }
 }
 
 void display() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+
     drawCube(Vec3(1.5f, 0.0f, -7.0f));
+    drawParticles();
+
+    glutSwapBuffers();
 }
 
 void initGL() {
@@ -92,6 +107,7 @@ int main(int argc, char** argv) {
 	glutDisplayFunc(display);
     glutReshapeFunc(reshape);
 	initGL();
+    initParticles();
 	glutMainLoop();
 	return 0;
 }

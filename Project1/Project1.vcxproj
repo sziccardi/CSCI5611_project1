@@ -122,10 +122,12 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="matrices.cpp" />
+    <ClCompile Include="particle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
     <ClInclude Include="matrices.h" />
+    <ClInclude Include="particle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,8 +4,17 @@
 
 #include "matrices.h"
 
+#include "particle.h"
+
+std::vector<Particle*> mParticles;
+int mMaxNumParticles = 10;
+float mParticleRadius = 0.5f;
+
+void initParticles();
+
 /* Specific draw functions */
 void drawCube(Vec3 pos);
+void drawParticles();
 
 /* Display loop */
 void display();
@@ -13,6 +22,5 @@ void display();
 /* OpenGl helper functions */
 //Set up the screen and rendering settings
 void initGL();
-//Handler for window re-size event. Called back when the window first appears and
-//whenever the window is re-sized with its new width and height
+//Handler for window re-size event.
 void reshape(GLsizei width, GLsizei height);
