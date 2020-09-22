@@ -4,7 +4,18 @@ void initParticles() {
     for (int i = 0; i < mMaxNumParticles; i++) {
         Vec3 pos = Vec3(rand() % 10 - 5.f, rand() % 10 - 5.f, rand() % 10 - 12.f);
         Vec3 color = Vec3(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-        mParticles.push_back(new Particle(pos, mParticleRadius, color));
+        mParticles.push_back(new Particle(pos, Vec3(0.f, 0.f, 0.f), mParticleRadius, color));
+    }
+}
+
+void checkForParticleInteractions(Particle* p)
+{
+}
+
+void moveParticles(float dt)
+{
+    for (auto particle : mParticles) {
+        particle->update(dt);
     }
 }
 
@@ -58,8 +69,10 @@ void drawCube(Vec3 pos) {
     glEnd();  // End of drawing color-cube
 }
 
-void drawParticles() {
+void updateParticles(float dt) {
     for (auto it : mParticles) {
+        it->update(dt);
+        checkForParticleInteractions(it); //TODO: does this need to be before the moving?
         it->draw();
     }
 }
@@ -68,8 +81,12 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
 
+    float oldTime = mTimeElapsed;
+    mTimeElapsed = glutGet(GLUT_ELAPSED_TIME);
+    float dt = mTimeElapsed - oldTime;
+    updateParticles(mTimeElapsed - oldTime);
+
     drawCube(Vec3(1.5f, 0.0f, -7.0f));
-    drawParticles();
 
     glutSwapBuffers();
 }

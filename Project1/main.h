@@ -10,11 +10,14 @@ std::vector<Particle*> mParticles;
 int mMaxNumParticles = 10;
 float mParticleRadius = 0.5f;
 
+float mTimeElapsed = 0.f;
+
 void initParticles();
+void checkForParticleInteractions(Particle* p);
+void updateParticles(float dt);
 
 /* Specific draw functions */
 void drawCube(Vec3 pos);
-void drawParticles();
 
 /* Display loop */
 void display();
