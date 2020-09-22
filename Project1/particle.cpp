@@ -13,10 +13,12 @@ Particle::Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color) :
 }
 
 void Particle::draw()
-{
+{	
 	glColor3f(mColor.x(), mColor.y(), mColor.z());
+	//glPushMatrix();
 	glTranslatef(mPosition.x(), mPosition.y(), mPosition.z());
 	glutSolidSphere(mRadius, 50, 50);
+	//glPopMatrix();
 	glEnd();
 }
 
@@ -27,7 +29,7 @@ void Particle::moveTo(Vec3 newPos)
 }
 
 void Particle::shift(Vec3 deltaPos)
-{
+{ 
 	mPosition += deltaPos;
 }
 
