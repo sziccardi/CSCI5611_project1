@@ -113,6 +113,8 @@ public:
 	float y();
 	float z();
 
+	Vec3& cross(Vec3 secondVec);
+
 	string getType() {
 		return "Vec3";
 	}

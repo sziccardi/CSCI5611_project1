@@ -1,4 +1,136 @@
 #include "main.h"
+#include <cmath>
+#include <chrono> 
+using namespace std::chrono;
+#define M_PI 3.14159265358979323846
+
+//https://learnopengl.com/Getting-started/Camera
+
+unsigned char keyStates[256] = { 0 };
+
+Vec3 cameraPos = Vec3(0.0f, 0.0f, 3.0f);
+Vec3 cameraFront = Vec3(0.0f, 0.0f, -1.0f);
+Vec3 cameraUp = Vec3(0.0f, 1.0f, 0.0f);
+Vec2 mouseAngles = Vec2(0, 0);
+
+float horizontal = 3.14f;
+float vertical = 0.0f;
+
+float cameraSpeed = 2.0f;
+float mouseSpeed = 0.010f;
+
+float previousFrame = 0.0f;
+
+
+
+
+float deltaTime = 0.0f;
+void keyPressed(unsigned char key, int x, int y) {
+    keyStates[key] = true;
+}
+
+void keyUp(unsigned char key, int x, int y) {
+    keyStates[key] = false;
+}
+
+void keyOperations(void) {
+
+   
+
+    //time in seconds
+    float currTime = glutGet(GLUT_ELAPSED_TIME) / 1000;
+    deltaTime = currTime - previousFrame;
+    float cameraAdjustedSpeed = cameraSpeed * deltaTime;
+    previousFrame = currTime;
+    int ww = glutGet(GLUT_WINDOW_WIDTH);
+    int wh = glutGet(GLUT_WINDOW_HEIGHT);
+
+    horizontal += mouseSpeed * deltaTime * float(ww / 2 - mouseAngles.x());
+    vertical += mouseSpeed * deltaTime * float(wh / 2 - mouseAngles.y());
+
+    //Check for mousing too far
+    if (horizontal < -M_PI)
+        horizontal += M_PI * 2;
+    else if (horizontal > M_PI)
+        horizontal -= M_PI * 2;
+
+    if (vertical < -M_PI / 2)
+        vertical = -M_PI / 2;
+    if (vertical > M_PI / 2)
+        vertical = M_PI / 2;
+
+    cameraFront.setVal(0, 0, cos(vertical) * sin(horizontal));
+    cameraFront.setVal(1, 0, sin(vertical));
+    cameraFront.setVal(2, 0, cos(vertical) * cos(horizontal));
+
+    OutputDebugStringA(cameraFront.toString().c_str());
+
+    if (keyStates['a']) { // If the 'a' key has been pressed  
+        // Perform 'a' key operations  
+        cameraPos -= cameraFront.cross(cameraUp).normalized() * cameraAdjustedSpeed;
+    }
+
+    if (keyStates['w']) { // If the 'a' key has been pressed  
+            // Perform 'w' key operations
+
+        //cameraPos += cameraSpeed * cameraFront;
+        cameraPos += toVec3(cameraFront * cameraAdjustedSpeed);
+    }
+
+    if (keyStates['s']) { // If the 'a' key has been pressed  
+        // Perform 's' key operations  
+        cameraPos -= toVec3(cameraFront * cameraAdjustedSpeed);
+    }
+
+    if (keyStates['d']) { // If the 'a' key has been pressed  
+        // Perform 'd' key operations  
+        cameraPos += cameraFront.cross(cameraUp).normalized() * cameraAdjustedSpeed;
+    }
+
+
+
+}
+
+void mouseMovement(int x, int y) {
+
+    mouseAngles.setVal(0, 0, x);
+    mouseAngles.setVal(1, 0, y);
+    //static bool wrap = false;
+
+    //if (!wrap) {
+        int ww = glutGet(GLUT_WINDOW_WIDTH);
+        int wh = glutGet(GLUT_WINDOW_HEIGHT);
+
+    //    int dx = x - ww / 2;
+    //    int dy = y - wh / 2;
+
+    //    // Do something with dx and dy here
+
+    //    mouseAngles.setVal(0, 0, mouseAngles.x() + dx * mouseSpeed);
+    //    mouseAngles.setVal(1, 0, mouseAngles.y() + dy * mouseSpeed);
+
+    //    if (mouseAngles.x() < -M_PI)
+    //        mouseAngles.setVal(0, 0, mouseAngles.x() + M_PI * 2);
+
+    //    else if (mouseAngles.x() > M_PI)
+    //        mouseAngles.setVal(0, 0, mouseAngles.x() - M_PI * 2);
+
+    //    if (mouseAngles.y() < -M_PI / 2)
+    //        mouseAngles.setVal(1, 0, -M_PI / 2);
+    //    if (mouseAngles.y() > M_PI / 2)
+    //        mouseAngles.setVal(1, 0, M_PI / 2);
+
+
+    //    cameraFront.setVal(0, 0, cos(mouseAngles.y() * sin(mouseAngles.x())))
+
+    //    // move mouse pointer back to the center of the window
+    //    wrap = true;
+        glutWarpPointer(ww / 2, wh / 2);
+    //}
+    //else {
+    //    wrap = false;
+    //}
+}
 
 void initParticles() {
     for (int i = 0; i < mMaxNumParticles; i++) {
@@ -10,7 +142,8 @@ void initParticles() {
 
 void drawCube(Vec3 pos) {
 	// Render a color-cube consisting of 6 quads with different colors
-	glLoadIdentity();
+	
+    glPushMatrix();
 	glTranslatef(pos.x(), pos.y(), pos.z());
 
 	glBegin(GL_QUADS);
@@ -56,6 +189,7 @@ void drawCube(Vec3 pos) {
     glVertex3f(1.0f, -1.0f, 1.0f);
     glVertex3f(1.0f, -1.0f, -1.0f);
     glEnd();  // End of drawing color-cube
+    glPopMatrix();
 }
 
 void drawParticles() {
@@ -65,13 +199,30 @@ void drawParticles() {
 }
 
 void display() {
+    auto start = high_resolution_clock::now();
+    keyOperations();
+
+    
+    Vec3 res = toVec3(cameraFront + cameraPos);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
+
+    //OutputDebugStringA(cameraPos.toString().c_str());
+    glLoadIdentity();
+    gluLookAt(cameraPos.x(), cameraPos.y(), cameraPos.z(), res.x(), res.y(), res.z(), cameraUp.x(), cameraUp.y(), cameraUp.z());
+
+   
 
     drawCube(Vec3(1.5f, 0.0f, -7.0f));
     drawParticles();
 
     glutSwapBuffers();
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+
+    OutputDebugString(("Time taken by function: " + std::to_string(duration.count() / 1000.0f) + " milliseconds\n").c_str());
+    
 }
 
 void initGL() {
@@ -98,9 +249,16 @@ void reshape(GLsizei width, GLsizei height) {
     gluPerspective(45.0f, aspect, 0.1f, 100.0f);
 }
 
+void glutTimer(int val) {
+    glutPostRedisplay();
+    glutTimerFunc(16, glutTimer, 1);
+}
+
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE);
+    //glutGameModeString("640x480:32@120");
+    //glutEnterGameMode();
     glutInitWindowSize(640, 480);
     glutInitWindowPosition(50, 50);
 	glutCreateWindow("Project 1");
@@ -108,6 +266,16 @@ int main(int argc, char** argv) {
     glutReshapeFunc(reshape);
 	initGL();
     initParticles();
+    glutKeyboardFunc(keyPressed); // Tell GLUT to use the method "keyPressed" for key presses  
+    glutKeyboardUpFunc(keyUp); // Tell GLUT to use the method "keyUp" for key up events
+    glutPassiveMotionFunc(mouseMovement);
+    glutMotionFunc(mouseMovement);
+    glutSetCursor(GLUT_CURSOR_NONE);
+    glEnable(GL_CULL_FACE);
+
+    float currTime = glutGet(GLUT_ELAPSED_TIME) / 1000;
+    float previousTime = glutGet(GLUT_ELAPSED_TIME) / 1000;
+    glutTimerFunc(1, glutTimer, 1);
 	glutMainLoop();
 	return 0;
 }

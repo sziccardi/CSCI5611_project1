@@ -611,3 +611,10 @@ float Vec3::z() {
 	return mData[2][0];
 }
 
+Vec3& Vec3::cross(Vec3 secondVec) {
+	float newX = mData[1][0] * secondVec.z() - mData[2][0] * secondVec.y();
+	float newY = mData[2][0] * secondVec.y() - mData[0][0] * secondVec.z();
+	float newZ = mData[0][0] * secondVec.x() - mData[1][0] * secondVec.x();
+
+	return *(new Vec3(newX, newY, newZ));
+}
