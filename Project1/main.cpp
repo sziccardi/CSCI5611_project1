@@ -237,8 +237,7 @@ void setupBuilding() {
     
 }
 
-void drawGroundPlane()
-{
+void drawGroundPlane() {
     glPushMatrix();
 
     glBegin(GL_QUADS);
