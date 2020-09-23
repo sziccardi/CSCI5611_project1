@@ -17,16 +17,16 @@ using namespace std::chrono;
 
 unsigned char keyStates[256] = { 0 };
 
-Vec3 cameraPos = Vec3(0.0f, 0.0f, 3.0f);
-Vec3 cameraFront = Vec3(0.0f, 0.0f, -1.0f);
+Vec3 cameraPos = Vec3(0.0f, 1.0f, 0.0f);
+Vec3 cameraFront = Vec3(1.5f, 0.0f, -7.0f);
 Vec3 cameraUp = Vec3(0.0f, 1.0f, 0.0f);
 Vec2 mouseAngles = Vec2(0, 0);
 
 float horizontal = 3.14f;
 float vertical = 0.0f;
 
-float cameraSpeed = 0.0f;
-float mouseSpeed = 0.000f;
+float cameraSpeed = 0.5f;
+float mouseSpeed = 0.01f;
 
 float previousFrame = 0.0f;
 float deltaTime = 0.0f;

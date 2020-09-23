@@ -13,11 +13,16 @@ void keyOperations(void) {
     int ww = glutGet(GLUT_WINDOW_WIDTH);
     int wh = glutGet(GLUT_WINDOW_HEIGHT);
 
-    horizontal += mouseSpeed * deltaTime * float(ww / 2 - mouseAngles.x());
-    vertical += mouseSpeed * deltaTime * float(wh / 2 - mouseAngles.y());
+    float horizontal = deltaTime * mouseSpeed * (ww / 2 - mouseAngles.x());
+    float vertical = deltaTime * mouseSpeed * (wh / 2 - mouseAngles.y());
+
+  
+
+    //horizontal += mouseSpeed * deltaTime * float(ww / 2 - mouseAngles.x());
+    //vertical += mouseSpeed * deltaTime * float(wh / 2 - mouseAngles.y());
 
     //Check for mousing too far
-    if (horizontal < -M_PI)
+   /* if (horizontal < -M_PI)
         horizontal += M_PI * 2;
     else if (horizontal > M_PI)
         horizontal -= M_PI * 2;
@@ -25,34 +30,45 @@ void keyOperations(void) {
     if (vertical < -M_PI / 2)
         vertical = -M_PI / 2;
     if (vertical > M_PI / 2)
-        vertical = M_PI / 2;
+        vertical = M_PI / 2;*/
 
     cameraFront.setVal(0, 0, cos(vertical) * sin(horizontal));
     cameraFront.setVal(1, 0, sin(vertical));
     cameraFront.setVal(2, 0, cos(vertical) * cos(horizontal));
 
-    OutputDebugStringA(cameraFront.toString().c_str());
+    Vec3 right = Vec3(sin(horizontal - M_PI / 2.0f), 0, cos(horizontal - M_PI / 2.0f));
+    cameraUp = cameraFront.cross(right);
+
+    //OutputDebugStringA(cameraFront.toString().c_str());
 
     if (keyStates['a']) { // If the 'a' key has been pressed  
         // Perform 'a' key operations  
-        cameraPos -= cameraFront.cross(cameraUp).normalized() * cameraAdjustedSpeed;
+        OutputDebugString("a");
+        cameraPos -= right * cameraAdjustedSpeed;
+        //cameraPos -= cameraFront.cross(cameraUp).normalized() * cameraAdjustedSpeed;
     }
 
     if (keyStates['w']) { // If the 'a' key has been pressed  
             // Perform 'w' key operations
+        OutputDebugString("w");
 
         //cameraPos += cameraSpeed * cameraFront;
-        cameraPos += toVec3(cameraFront * cameraAdjustedSpeed);
+        cameraPos += cameraFront * cameraAdjustedSpeed;
     }
 
     if (keyStates['s']) { // If the 'a' key has been pressed  
-        // Perform 's' key operations  
-        cameraPos -= toVec3(cameraFront * cameraAdjustedSpeed);
+        // Perform 's' key operations
+        OutputDebugString("s");
+
+        cameraPos -= cameraFront * cameraAdjustedSpeed;
     }
 
     if (keyStates['d']) { // If the 'a' key has been pressed  
         // Perform 'd' key operations  
-        cameraPos += cameraFront.cross(cameraUp).normalized() * cameraAdjustedSpeed;
+        OutputDebugString("d");
+        cameraPos += right * cameraAdjustedSpeed;
+
+        //cameraPos += cameraFront.cross(cameraUp).normalized() * cameraAdjustedSpeed;
     }
 
 
@@ -61,11 +77,14 @@ void keyOperations(void) {
 
 void mouseMovement(int x, int y) {
 
-    mouseAngles.setVal(0, 0, x);
-    mouseAngles.setVal(1, 0, y);
-    //static bool wrap = false;
+  
+    static bool wrap = false;
 
     //if (!wrap) {
+
+        mouseAngles.setVal(0, 0, x);
+        mouseAngles.setVal(1, 0, y);
+
         int ww = glutGet(GLUT_WINDOW_WIDTH);
         int wh = glutGet(GLUT_WINDOW_HEIGHT);
 
@@ -94,10 +113,9 @@ void mouseMovement(int x, int y) {
     //    // move mouse pointer back to the center of the window
     //    wrap = true;
         glutWarpPointer(ww / 2, wh / 2);
-    //}
-    //else {
+    //} else/* {
     //    wrap = false;
-    //}
+    //}*/
 }
 
 void initParticles() {
@@ -203,13 +221,14 @@ void display() {
 
     auto start = high_resolution_clock::now();
     keyOperations();
-
+    gluPerspective(M_PI / 2, 4.0f / 3.0f, 0.1f, 100.0f);
     Vec3 lookAt = toVec3(cameraFront + cameraPos);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
-
-    //OutputDebugStringA(cameraPos.toString().c_str());
+    
+    OutputDebugStringA(cameraPos.toString().c_str());
+    OutputDebugStringA(cameraFront.toString().c_str());
     glLoadIdentity();
     gluLookAt(cameraPos.x(), cameraPos.y(), cameraPos.z(), lookAt.x(), lookAt.y(), lookAt.z(), cameraUp.x(), cameraUp.y(), cameraUp.z());
 
