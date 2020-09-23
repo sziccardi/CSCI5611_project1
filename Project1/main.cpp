@@ -65,46 +65,6 @@ void keyOperations(void) {
     }
 }
 
-void mouseMovement(int x, int y) {
-
-    mouseAngles.setVal(0, 0, x);
-    mouseAngles.setVal(1, 0, y);
-    //static bool wrap = false;
-
-    //if (!wrap) {
-        int ww = glutGet(GLUT_WINDOW_WIDTH);
-        int wh = glutGet(GLUT_WINDOW_HEIGHT);
-
-    //    int dx = x - ww / 2;
-    //    int dy = y - wh / 2;
-
-    //    // Do something with dx and dy here
-
-    //    mouseAngles.setVal(0, 0, mouseAngles.x() + dx * mouseSpeed);
-    //    mouseAngles.setVal(1, 0, mouseAngles.y() + dy * mouseSpeed);
-
-    //    if (mouseAngles.x() < -M_PI)
-    //        mouseAngles.setVal(0, 0, mouseAngles.x() + M_PI * 2);
-
-    //    else if (mouseAngles.x() > M_PI)
-    //        mouseAngles.setVal(0, 0, mouseAngles.x() - M_PI * 2);
-
-    //    if (mouseAngles.y() < -M_PI / 2)
-    //        mouseAngles.setVal(1, 0, -M_PI / 2);
-    //    if (mouseAngles.y() > M_PI / 2)
-    //        mouseAngles.setVal(1, 0, M_PI / 2);
-
-
-    //    cameraFront.setVal(0, 0, cos(mouseAngles.y() * sin(mouseAngles.x())))
-
-    //    // move mouse pointer back to the center of the window
-    //    wrap = true;
-        glutWarpPointer(ww / 2, wh / 2);
-    //}
-    //else {
-    //    wrap = false;
-    //}
-}
 
 void initParticles() {
     for (int i = 0; i < mMaxNumParticles; i++) {
@@ -114,12 +74,11 @@ void initParticles() {
     }
 }
 
-void checkForParticleInteractions(Particle* p)
-{
+void checkForParticleInteractions(Particle* p) {
+
 }
 
-void moveParticles(float dt)
-{
+void moveParticles(float dt) {
     for (auto particle : mParticles) {
         particle->update(dt);
     }
@@ -177,10 +136,7 @@ void drawCube(Vec3 pos) {
     glPopMatrix();
 }
 
-
-
-void drawGroundPlane()
-{
+void drawGroundPlane() {
     glPushMatrix();
 
     glBegin(GL_QUADS);
@@ -204,11 +160,6 @@ void updateParticles(float dt) {
 }
 
 void display() {
-    //update time info
-    //float currTime = glutGet(GLUT_ELAPSED_TIME) / 1000;
-   // deltaTime = currTime - previousFrame;
-    //previousFrame = currTime;
-
     //auto start = high_resolution_clock::now();
 
     Vec3 lookAt = toVec3(cameraFront + cameraPos);
@@ -228,8 +179,7 @@ void display() {
     //auto stop = high_resolution_clock::now();
     //auto duration = duration_cast<microseconds>(stop - start);
 
-    //OutputDebugString(("Time taken by function: " + std::to_string(duration.count() / 1000.0f) + " milliseconds\n").c_str());
-    
+    //OutputDebugString(("Time taken by function: " + std::to_string(duration.count() / 1000.0f) + " milliseconds\n").c_str());   
 }
 
 void initGL() {
@@ -257,7 +207,6 @@ void reshape(GLsizei width, GLsizei height) {
 }
 
 void animLoop(int val) {
-
     keyOperations();
 
     glutPostRedisplay();
@@ -269,8 +218,6 @@ int main(int argc, char** argv) {
 
 	/*display stuff*/
     glutInitDisplayMode(GLUT_DOUBLE);
-    //glutGameModeString("640x480:32@120");
-    //glutEnterGameMode();
     glutInitWindowSize(640, 480);
     glutInitWindowPosition(50, 50);
 	glutCreateWindow("Project 1");
@@ -284,9 +231,6 @@ int main(int argc, char** argv) {
     /*interactions stuff*/
     glutKeyboardFunc(keyPressed); // Tell GLUT to use the method "keyPressed" for key presses  
     glutKeyboardUpFunc(keyUp); // Tell GLUT to use the method "keyUp" for key up events
-    //glutPassiveMotionFunc(mouseMovement);
-   // glutMotionFunc(mouseMovement);
-    //glutSetCursor(GLUT_CURSOR_NONE);
     glEnable(GL_CULL_FACE);
 
     glutTimerFunc(1, animLoop, 1);
