@@ -25,8 +25,8 @@ Vec2 mouseAngles = Vec2(0, 0);
 float horizontal = 3.14f;
 float vertical = 0.0f;
 
-float cameraSpeed = 2.0f;
-float mouseSpeed = 0.010f;
+float cameraSpeed = 0.0f;
+float mouseSpeed = 0.000f;
 
 float previousFrame = 0.0f;
 float deltaTime = 0.0f;

@@ -209,14 +209,13 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
 
-    updateParticles(deltaTime);
-
     //OutputDebugStringA(cameraPos.toString().c_str());
     glLoadIdentity();
     gluLookAt(cameraPos.x(), cameraPos.y(), cameraPos.z(), lookAt.x(), lookAt.y(), lookAt.z(), cameraUp.x(), cameraUp.y(), cameraUp.z());
 
     drawCube(Vec3(1.5f, 0.0f, -7.0f));
     drawGroundPlane();
+    updateParticles(deltaTime);
 
     glutSwapBuffers();
     auto stop = high_resolution_clock::now();
