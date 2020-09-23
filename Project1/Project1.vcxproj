@@ -122,9 +122,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="matrices.cpp" />
+    <ClCompile Include="Obstacle.cpp" />
     <ClCompile Include="particle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Obstacle.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="matrices.h" />
     <ClInclude Include="particle.h" />
