@@ -60,3 +60,8 @@ void display();
 void initGL();
 //Handler for window re-size event.
 void reshape(GLsizei width, GLsizei height);
+
+/* Input handlers */
+void keyPressed(unsigned char key, int x, int y);
+void keyUp(unsigned char key, int x, int y);
+void keyOperations(void);
