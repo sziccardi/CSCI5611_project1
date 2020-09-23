@@ -25,7 +25,7 @@ Vec2 mouseAngles = Vec2(0, 0);
 float horizontal = 3.14f;
 float vertical = 0.0f;
 
-float cameraSpeed = 0.05f;
+float cameraSpeed = 5.0f;
 float mouseSpeed = 0.0f;
 
 float previousFrame = 0.0f;
@@ -34,6 +34,10 @@ float deltaTime = 0.01667f;
 std::vector<Particle*> mParticles;
 int mMaxNumParticles = 10;
 float mParticleRadius = 0.5f;
+
+float buildingMin = 20;
+int buildingSize = 70;
+int buildingHeightSize = 300;
 
 void initParticles();
 void checkForParticleInteractions(Particle* p);

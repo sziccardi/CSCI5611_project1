@@ -1,5 +1,9 @@
 #include "main.h"
 
+
+float buildingWidth = buildingMin + rand() % buildingSize;
+float buildingHeight = buildingMin + rand() % buildingHeightSize;
+
 void keyPressed(unsigned char key, int x, int y) {
     keyStates[key] = true;
 }
@@ -15,10 +19,12 @@ void keyOperations(void) {
 
     //OutputDebugStringA(cameraFront.toString().c_str());
 
-    float phi = atan(-cameraFront.z() / cameraFront.x());
-    float theta = atan(sqrt(cameraFront.z() * cameraFront.z() + cameraFront.x() * cameraFront.x()) / cameraFront.y());
+    float phi = atan2(-cameraFront.z(), cameraFront.x());
+    float theta = atan2(sqrt(cameraFront.z() * cameraFront.z() + cameraFront.x() * cameraFront.x()), cameraFront.y());
     float oldPhi = phi;
     float oldTheta = theta;
+
+
     if (keyStates['w']) { // If the 'a' key has been pressed  
         //turn up
         //in spherical, -- theta
@@ -170,6 +176,8 @@ void drawCube(Vec3 pos) {
     glEnd();  // End of drawing color-cube
     glPopMatrix();
 }
+
+
 
 void drawGroundPlane()
 {
