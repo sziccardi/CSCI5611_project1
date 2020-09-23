@@ -1,8 +1,6 @@
 #include "main.h"
 
 
-float buildingWidth = buildingMin + rand() % buildingSize;
-float buildingHeight = buildingMin + rand() % buildingHeightSize;
 
 void keyPressed(unsigned char key, int x, int y) {
     keyStates[key] = true;
@@ -114,6 +112,32 @@ void initParticles() {
     }
 }
 
+void initObstacles() {
+
+    float currBuildX = -1.0f;
+    float currBuildZ = -1.0f;
+    
+    float gridSpacing = buildingMin + buildingSize;
+
+    for (int r = 0; r < BUILDING_GRID_ROW; r++) {
+        for (int c = 0; c < BUILDING_GRID_COL; c++) {
+               
+            float buildingWidth = buildingMin + rand() % buildingSize;
+            float buildingHeight = buildingMin + rand() % buildingHeightSize;
+
+            Vec3 pos = Vec3(currBuildX, 1.0f, currBuildZ);
+            Vec3 size = Vec3(10, buildingHeight, -buildingWidth);
+
+            Vec3 color = Vec3(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+            mObstacles.push_back(new Obstacle(pos, size, color));
+
+            currBuildX += gridSpacing;
+        }
+        currBuildX = -1.0f;
+        currBuildZ += gridSpacing;
+    }
+}
+
 void checkForParticleInteractions(Particle* p)
 {
 }
@@ -200,10 +224,10 @@ void drawBuilding(Vec3 pos, Vec3 size) {
 
     // Front face  (z = 1.0f)
     glColor3f(1.0f, 0.0f, 0.0f);     // Red
-    glVertex3f(0, pos.y(), 0);
-    glVertex3f(0, pos.y(),  size.z());
-    glVertex3f(0, size.y(), size.z());
+    glVertex3f(0, 0, 0);
     glVertex3f(0, size.y(), 0);
+    glVertex3f(0, size.y(), size.z());
+    glVertex3f(0, 0, size.z());
 
 
     // Back face (z = -1.0f)
@@ -215,27 +239,36 @@ void drawBuilding(Vec3 pos, Vec3 size) {
 
     // Left face (x = -1.0f)
     glColor3f(0.0f, 0.0f, 1.0f);     // Blue
-    glVertex3f(0, 0, pos.z());
-    glVertex3f(size.x(), size.y(), 0);
     glVertex3f(0, 0, 0);
+    glVertex3f(size.x(), 0, 0);
     glVertex3f(size.x(), size.y(), 0);
+    glVertex3f(0, size.y(), 0);
+    
 
     // Right face (x = 1.0f)
     glColor3f(1.0f, 0.0f, 1.0f);     // Magenta
     glVertex3f(0, 0, size.z());
+    glVertex3f(0, size.y(), size.z());
     glVertex3f(size.x(), size.y(), size.z());
-    glVertex3f(0, 0, 0);
-    glVertex3f(size.x(), size.y(), size.z());
+    glVertex3f(size.x(), 0, size.z());
     glEnd();  // End of drawing color-cube
     glPopMatrix();
 }
 
-
-void setupBuilding() {
-    Vec3 pos = Vec3(-1.0f, -1.0f, -1.0f);
-    Vec3 size = Vec3(50, buildingHeight, -buildingWidth);
-    
+void drawObstacles() {
+    for (auto it : mObstacles) {
+        //it->update(dt);
+        //checkForParticleInteractions(it); //TODO: does this need to be before the moving?
+        it->draw();
+    }
 }
+
+
+//void setupBuilding() {
+//    Vec3 pos = Vec3(-1.0f, 1.0f, -1.0f);
+//    Vec3 size = Vec3(50, buildingHeight, -buildingWidth);
+//    drawBuilding(pos, size);
+//}
 
 void drawGroundPlane()
 {
@@ -281,7 +314,7 @@ void display() {
     drawCube(Vec3(1.5f, 0.0f, -7.0f));
     drawGroundPlane();
     updateParticles(deltaTime);
-    setupBuilding();
+    drawObstacles();
 
     glutSwapBuffers();
     //auto stop = high_resolution_clock::now();
@@ -289,6 +322,17 @@ void display() {
 
     //OutputDebugString(("Time taken by function: " + std::to_string(duration.count() / 1000.0f) + " milliseconds\n").c_str());
     
+}
+
+void mouse(int button, int state, int x, int y) {
+    // Wheel reports as button 3(scroll up) and button 4(scroll down)
+    if ((button == 3) || (button == 4)) { // It's a wheel event 
+        // Each wheel event reports like a button click, GLUT_DOWN then GLUT_UP
+        if (state == GLUT_UP) return; // Disregard redundant GLUT_UP events
+        printf("Scroll %s At %d %d\n", (button == 3) ? "Up" : "Down", x, y);
+    } else {  // normal button event
+        printf("Button %s At %d %d\n", (state == GLUT_DOWN) ? "Down" : "Up", x, y);
+    }
 }
 
 void initGL() {
@@ -339,6 +383,7 @@ int main(int argc, char** argv) {
     
     /*particle stuff*/
     initParticles();
+    initObstacles();
 
     /*interactions stuff*/
     glutKeyboardFunc(keyPressed); // Tell GLUT to use the method "keyPressed" for key presses  
@@ -346,6 +391,7 @@ int main(int argc, char** argv) {
     //glutPassiveMotionFunc(mouseMovement);
    // glutMotionFunc(mouseMovement);
     //glutSetCursor(GLUT_CURSOR_NONE);
+    glutMouseFunc(mouse);
     glEnable(GL_CULL_FACE);
 
     glutTimerFunc(1, animLoop, 1);

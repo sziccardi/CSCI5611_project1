@@ -7,10 +7,11 @@
 
 #include "matrices.h"
 #include "particle.h"
+#include "Obstacle.h"
 
 #define M_PI 3.14159265358979323846
-#define BUILDING_GRID_ROW 1
-#define BUIDLING_GRID_COL 1
+#define BUILDING_GRID_ROW 10
+#define BUILDING_GRID_COL 10
 
 using namespace std::chrono;
 
@@ -34,15 +35,17 @@ float mouseSpeed = 0.0f;
 float previousFrame = 0.0f;
 float deltaTime = 0.01667f;
 
-Matrix buildings[BUILDING_GRID_ROW][BUIDLING_GRID_COL] = {};
+Matrix buildings[BUILDING_GRID_ROW][BUILDING_GRID_COL] = {};
 
 std::vector<Particle*> mParticles;
+std::vector<Obstacle*> mObstacles;
 int mMaxNumParticles = 10;
+
 float mParticleRadius = 0.5f;
 
-float buildingMin = 20;
-int buildingSize = 70;
-int buildingHeightSize = 300;
+float buildingMin = 5;
+int buildingSize = 10;
+int buildingHeightSize = 20;
 
 void initParticles();
 void checkForParticleInteractions(Particle* p);
