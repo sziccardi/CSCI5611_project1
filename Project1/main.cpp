@@ -68,11 +68,18 @@ void keyOperations(void) {
 
 void initParticles() {
     for (int i = 0; i < mMaxNumParticles; i++) {
-        float x = (float)(rand() % 72 - 36.f);
-        float y = (float)(rand() % 72);
-        float z = (float)(rand() % 72 - 36.f);
+        //float x = (float)(rand() % 72 - 36.f);
+        //float y = (float)(rand() % 24);
+        //float z = (float)(rand() % 72 - 144.f);
+        float x = 0.f;
+        float y = 120.f;
+        float z = -120.f;
         Vec3 pos = Vec3(x, y, z);
-        Vec3 color = Vec3(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+        float r = 0.f;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        float g = 1.0f;// static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        float b = 0.f; // static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+        Vec3 color = Vec3(r,g, b);
         mParticles.push_back(new Particle(pos, Vec3(0.f, 0.f, 0.f), mParticleRadius, color));
     }
 }
@@ -212,7 +219,7 @@ void reshape(GLsizei width, GLsizei height) {
     glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
     glLoadIdentity();             // Reset
     // Enable perspective projection with fovy, aspect, zNear and zFar
-    gluPerspective(45.0f, aspect, 0.1f, 100.0f);
+    gluPerspective(45.0f, aspect, 0.1f, 1000.0f);
 }
 
 void animLoop(int val) {
