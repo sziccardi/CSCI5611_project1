@@ -1,30 +1,5 @@
 #include "main.h"
-#include <cmath>
-#include <chrono> 
-using namespace std::chrono;
-#define M_PI 3.14159265358979323846
 
-//https://learnopengl.com/Getting-started/Camera
-
-unsigned char keyStates[256] = { 0 };
-
-Vec3 cameraPos = Vec3(0.0f, 0.0f, 3.0f);
-Vec3 cameraFront = Vec3(0.0f, 0.0f, -1.0f);
-Vec3 cameraUp = Vec3(0.0f, 1.0f, 0.0f);
-Vec2 mouseAngles = Vec2(0, 0);
-
-float horizontal = 3.14f;
-float vertical = 0.0f;
-
-float cameraSpeed = 2.0f;
-float mouseSpeed = 0.010f;
-
-float previousFrame = 0.0f;
-
-
-
-
-float deltaTime = 0.0f;
 void keyPressed(unsigned char key, int x, int y) {
     keyStates[key] = true;
 }
@@ -34,14 +9,7 @@ void keyUp(unsigned char key, int x, int y) {
 }
 
 void keyOperations(void) {
-
-   
-
-    //time in seconds
-    float currTime = glutGet(GLUT_ELAPSED_TIME) / 1000;
-    deltaTime = currTime - previousFrame;
     float cameraAdjustedSpeed = cameraSpeed * deltaTime;
-    previousFrame = currTime;
     int ww = glutGet(GLUT_WINDOW_WIDTH);
     int wh = glutGet(GLUT_WINDOW_HEIGHT);
 
@@ -203,35 +171,52 @@ void drawCube(Vec3 pos) {
     glPopMatrix();
 }
 
+void drawGroundPlane()
+{
+    glPushMatrix();
+
+    glBegin(GL_QUADS);
+    // Top face (y = 1.0f)
+    glColor3f(1.0f, 0.0f, 1.0f);     
+    glVertex3f(100.0f, -1.0f, -100.0f);
+    glVertex3f(-100.0f, -1.0f, -100.0f);
+    glVertex3f(-100.0f, -1.0f, 100.0f);
+    glVertex3f(100.0f, -1.0f, 100.0f);
+
+    glEnd();  // End of drawing ground plane
+    glPopMatrix();
+}
+
 void updateParticles(float dt) {
     for (auto it : mParticles) {
-        it->update(dt);
-        checkForParticleInteractions(it); //TODO: does this need to be before the moving?
+        //it->update(dt);
+        //checkForParticleInteractions(it); //TODO: does this need to be before the moving?
         it->draw();
     }
 }
 
 void display() {
+    //time in seconds
+    float currTime = glutGet(GLUT_ELAPSED_TIME) / 1000;
+    deltaTime = currTime - previousFrame;
+    previousFrame = currTime;
+
     auto start = high_resolution_clock::now();
     keyOperations();
 
-    
-    Vec3 res = toVec3(cameraFront + cameraPos);
+    Vec3 lookAt = toVec3(cameraFront + cameraPos);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
 
-    float oldTime = mTimeElapsed;
-    mTimeElapsed = glutGet(GLUT_ELAPSED_TIME);
-    float dt = mTimeElapsed - oldTime;
-    updateParticles(mTimeElapsed - oldTime);
+    updateParticles(deltaTime);
 
     //OutputDebugStringA(cameraPos.toString().c_str());
     glLoadIdentity();
-    gluLookAt(cameraPos.x(), cameraPos.y(), cameraPos.z(), res.x(), res.y(), res.z(), cameraUp.x(), cameraUp.y(), cameraUp.z());
-
+    gluLookAt(cameraPos.x(), cameraPos.y(), cameraPos.z(), lookAt.x(), lookAt.y(), lookAt.z(), cameraUp.x(), cameraUp.y(), cameraUp.z());
 
     drawCube(Vec3(1.5f, 0.0f, -7.0f));
+    drawGroundPlane();
 
     glutSwapBuffers();
     auto stop = high_resolution_clock::now();
@@ -272,7 +257,9 @@ void glutTimer(int val) {
 
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE);
+
+	/*display stuff*/
+    glutInitDisplayMode(GLUT_DOUBLE);
     //glutGameModeString("640x480:32@120");
     //glutEnterGameMode();
     glutInitWindowSize(640, 480);
@@ -281,7 +268,11 @@ int main(int argc, char** argv) {
 	glutDisplayFunc(display);
     glutReshapeFunc(reshape);
 	initGL();
+    
+    /*particle stuff*/
     initParticles();
+
+    /*interactions stuff*/
     glutKeyboardFunc(keyPressed); // Tell GLUT to use the method "keyPressed" for key presses  
     glutKeyboardUpFunc(keyUp); // Tell GLUT to use the method "keyUp" for key up events
     glutPassiveMotionFunc(mouseMovement);
@@ -289,8 +280,6 @@ int main(int argc, char** argv) {
     glutSetCursor(GLUT_CURSOR_NONE);
     glEnable(GL_CULL_FACE);
 
-    float currTime = glutGet(GLUT_ELAPSED_TIME) / 1000;
-    float previousTime = glutGet(GLUT_ELAPSED_TIME) / 1000;
     glutTimerFunc(1, glutTimer, 1);
 	glutMainLoop();
 	return 0;
