@@ -17,8 +17,8 @@ using namespace std::chrono;
 
 unsigned char keyStates[256] = { 0 };
 
-Vec3 cameraPos = Vec3(0.0f, 1.0f, 0.0f);
-Vec3 cameraFront = Vec3(1.5f, 0.0f, -7.0f);
+Vec3 cameraPos = Vec3(0.0f, 72.0f, 0.0f);
+Vec3 cameraFront = Vec3(0.f, -7.0f, -7.0f);
 Vec3 cameraUp = Vec3(0.0f, 1.0f, 0.0f);
 Vec2 mouseAngles = Vec2(0, 0);
 
@@ -33,14 +33,19 @@ float deltaTime = 0.01667f;
 
 std::vector<Particle*> mParticles;
 int mMaxNumParticles = 10;
-float mParticleRadius = 0.5f;
+float mParticleRadius = 24.f;
 
 float buildingMin = 20;
 int buildingSize = 70;
 int buildingHeightSize = 300;
 
+float mGroundPlanePos = -1.f;
+float mGroundPlaneSize = 500.f;
+
 void initParticles();
 void checkForParticleInteractions(Particle* p);
+void checkForGroundInteraction(Particle* p);
+void checkForObstacleInteraction(Particle* p);
 void updateParticles(float dt);
 
 /* Specific draw functions */

@@ -92,6 +92,7 @@ void Particle::update(float dt)
 		//F = ma assume m = 1
 		// delta v = F dt
 		// delta x = v dt
+		mCurrentForce += mGravity;
 		mVelocity += toVec3(mCurrentForce * dt);
 		mPosition += toVec3(mVelocity * dt);
 		mCurrentForce = Vec3(0.f, 0.f, 0.f);

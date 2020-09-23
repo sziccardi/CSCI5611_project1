@@ -68,7 +68,10 @@ void keyOperations(void) {
 
 void initParticles() {
     for (int i = 0; i < mMaxNumParticles; i++) {
-        Vec3 pos = Vec3(rand() % 10 - 5.f, rand() % 10 - 5.f, rand() % 10 - 12.f);
+        float x = (float)(rand() % 72 - 36.f);
+        float y = (float)(rand() % 72);
+        float z = (float)(rand() % 72 - 36.f);
+        Vec3 pos = Vec3(x, y, z);
         Vec3 color = Vec3(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
         mParticles.push_back(new Particle(pos, Vec3(0.f, 0.f, 0.f), mParticleRadius, color));
     }
@@ -78,10 +81,14 @@ void checkForParticleInteractions(Particle* p) {
 
 }
 
-void moveParticles(float dt) {
-    for (auto particle : mParticles) {
-        particle->update(dt);
+void checkForGroundInteraction(Particle* p) {
+    if (p->getCurrentPos().y() < mGroundPlanePos) {
+        p->reflectOffOf(Vec3(0.f, 1.f, 0.f));
     }
+}
+
+void checkForObstacleInteraction(Particle* p) {
+
 }
 
 void drawCube(Vec3 pos) {
@@ -142,10 +149,10 @@ void drawGroundPlane() {
     glBegin(GL_QUADS);
     // Top face (y = 1.0f)
     glColor3f(1.0f, 0.0f, 1.0f);     
-    glVertex3f(100.0f, -1.0f, -100.0f);
-    glVertex3f(-100.0f, -1.0f, -100.0f);
-    glVertex3f(-100.0f, -1.0f, 100.0f);
-    glVertex3f(100.0f, -1.0f, 100.0f);
+    glVertex3f(mGroundPlaneSize, mGroundPlanePos, -mGroundPlaneSize);
+    glVertex3f(-mGroundPlaneSize, mGroundPlanePos, -mGroundPlaneSize);
+    glVertex3f(-mGroundPlaneSize, mGroundPlanePos, mGroundPlaneSize);
+    glVertex3f(mGroundPlaneSize, mGroundPlanePos, mGroundPlaneSize);
 
     glEnd();  // End of drawing ground plane
     glPopMatrix();
@@ -153,8 +160,10 @@ void drawGroundPlane() {
 
 void updateParticles(float dt) {
     for (auto it : mParticles) {
-        //it->update(dt);
-        //checkForParticleInteractions(it); //TODO: does this need to be before the moving?
+        checkForParticleInteractions(it); //TODO: does this need to be before the moving?
+        checkForGroundInteraction(it);
+        checkForObstacleInteraction(it);
+        it->update(dt);
         it->draw();
     }
 }
@@ -171,7 +180,7 @@ void display() {
     glLoadIdentity();
     gluLookAt(cameraPos.x(), cameraPos.y(), cameraPos.z(), lookAt.x(), lookAt.y(), lookAt.z(), cameraUp.x(), cameraUp.y(), cameraUp.z());
 
-    drawCube(Vec3(1.5f, 0.0f, -7.0f));
+    drawCube(Vec3(50.5f, 0.0f, -36.0f));
     drawGroundPlane();
     updateParticles(deltaTime);
 

@@ -34,6 +34,8 @@ public:
 	void flock(vector<Particle> neighbors);
 
 protected:
+	Vec3 mGravity = Vec3(0.f, -5.f, 0.f);
+
 	Vec3 mPosition;
 	Vec3 mVelocity;
 	Vec3 mCurrentForce;
