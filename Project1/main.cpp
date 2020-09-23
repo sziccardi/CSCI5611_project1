@@ -9,82 +9,63 @@ void keyUp(unsigned char key, int x, int y) {
 }
 
 void keyOperations(void) {
-    float cameraAdjustedSpeed = cameraSpeed * deltaTime;
-    int ww = glutGet(GLUT_WINDOW_WIDTH);
-    int wh = glutGet(GLUT_WINDOW_HEIGHT);
-
-    float horizontal = deltaTime * mouseSpeed * (ww / 2 - mouseAngles.x());
-    float vertical = deltaTime * mouseSpeed * (wh / 2 - mouseAngles.y());
-
-  
-
-    //horizontal += mouseSpeed * deltaTime * float(ww / 2 - mouseAngles.x());
-    //vertical += mouseSpeed * deltaTime * float(wh / 2 - mouseAngles.y());
-
-    //Check for mousing too far
-   /* if (horizontal < -M_PI)
-        horizontal += M_PI * 2;
-    else if (horizontal > M_PI)
-        horizontal -= M_PI * 2;
-
-    if (vertical < -M_PI / 2)
-        vertical = -M_PI / 2;
-    if (vertical > M_PI / 2)
-        vertical = M_PI / 2;*/
-
-    cameraFront.setVal(0, 0, cos(vertical) * sin(horizontal));
-    cameraFront.setVal(1, 0, sin(vertical));
-    cameraFront.setVal(2, 0, cos(vertical) * cos(horizontal));
-
-    Vec3 right = Vec3(sin(horizontal - M_PI / 2.0f), 0, cos(horizontal - M_PI / 2.0f));
-    cameraUp = cameraFront.cross(right);
+    float dCam = cameraSpeed * deltaTime;
+    //int ww = glutGet(GLUT_WINDOW_WIDTH);
+    //int wh = glutGet(GLUT_WINDOW_HEIGHT);
 
     //OutputDebugStringA(cameraFront.toString().c_str());
 
-    if (keyStates['a']) { // If the 'a' key has been pressed  
-        // Perform 'a' key operations  
-        OutputDebugString("a");
-        cameraPos -= right * cameraAdjustedSpeed;
-        //cameraPos -= cameraFront.cross(cameraUp).normalized() * cameraAdjustedSpeed;
-    }
-
+    float phi = atan(-cameraFront.z() / cameraFront.x());
+    float theta = atan(sqrt(cameraFront.z() * cameraFront.z() + cameraFront.x() * cameraFront.x()) / cameraFront.y());
+    float oldPhi = phi;
+    float oldTheta = theta;
     if (keyStates['w']) { // If the 'a' key has been pressed  
-            // Perform 'w' key operations
-        OutputDebugString("w");
-
-        //cameraPos += cameraSpeed * cameraFront;
-        cameraPos += cameraFront * cameraAdjustedSpeed;
+        //turn up
+        //in spherical, -- theta
+        theta -= dCam;
     }
 
-    if (keyStates['s']) { // If the 'a' key has been pressed  
-        // Perform 's' key operations
-        OutputDebugString("s");
-
-        cameraPos -= cameraFront * cameraAdjustedSpeed;
+    if (keyStates['a']) { // If the 'a' key has been pressed  
+        //turn left
+        //in spherical, ++ phi
+        phi += dCam;
     }
 
     if (keyStates['d']) { // If the 'a' key has been pressed  
-        // Perform 'd' key operations  
-        OutputDebugString("d");
-        cameraPos += right * cameraAdjustedSpeed;
-
-        //cameraPos += cameraFront.cross(cameraUp).normalized() * cameraAdjustedSpeed;
+        //turn right
+        //in spherical, -- phi
+        phi -= dCam;
     }
 
+    if (keyStates['s']) { // If the 'a' key has been pressed  
+        //turn down
+        //in spherical, ++ theta
+        //TODO: need a limit!?
+        theta += dCam;
+    }
 
+    float x = sin(theta) * cos(phi);
+    float z = -sin(theta) * sin(phi);
+    float y = cos(theta);
 
+    cameraFront.setVal(0, 0, x);
+    cameraFront.setVal(1, 0, y);
+    cameraFront.setVal(2, 0, z);
+
+    cameraFront.normalize();// maybe not necessary
+
+    if (keyStates[' ']) {
+        cameraPos += toVec3(cameraFront * dCam);
+    }
 }
 
 void mouseMovement(int x, int y) {
 
-  
-    static bool wrap = false;
+    mouseAngles.setVal(0, 0, x);
+    mouseAngles.setVal(1, 0, y);
+    //static bool wrap = false;
 
     //if (!wrap) {
-
-        mouseAngles.setVal(0, 0, x);
-        mouseAngles.setVal(1, 0, y);
-
         int ww = glutGet(GLUT_WINDOW_WIDTH);
         int wh = glutGet(GLUT_WINDOW_HEIGHT);
 
@@ -113,9 +94,10 @@ void mouseMovement(int x, int y) {
     //    // move mouse pointer back to the center of the window
     //    wrap = true;
         glutWarpPointer(ww / 2, wh / 2);
-    //} else/* {
+    //}
+    //else {
     //    wrap = false;
-    //}*/
+    //}
 }
 
 void initParticles() {
@@ -214,21 +196,19 @@ void updateParticles(float dt) {
 }
 
 void display() {
-    //time in seconds
-    float currTime = glutGet(GLUT_ELAPSED_TIME) / 1000;
-    deltaTime = currTime - previousFrame;
-    previousFrame = currTime;
+    //update time info
+    //float currTime = glutGet(GLUT_ELAPSED_TIME) / 1000;
+   // deltaTime = currTime - previousFrame;
+    //previousFrame = currTime;
 
-    auto start = high_resolution_clock::now();
-    keyOperations();
-    gluPerspective(M_PI / 2, 4.0f / 3.0f, 0.1f, 100.0f);
+    //auto start = high_resolution_clock::now();
+
     Vec3 lookAt = toVec3(cameraFront + cameraPos);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
-    
-    OutputDebugStringA(cameraPos.toString().c_str());
-    OutputDebugStringA(cameraFront.toString().c_str());
+
+    //OutputDebugStringA(cameraPos.toString().c_str());
     glLoadIdentity();
     gluLookAt(cameraPos.x(), cameraPos.y(), cameraPos.z(), lookAt.x(), lookAt.y(), lookAt.z(), cameraUp.x(), cameraUp.y(), cameraUp.z());
 
@@ -237,10 +217,10 @@ void display() {
     updateParticles(deltaTime);
 
     glutSwapBuffers();
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(stop - start);
+    //auto stop = high_resolution_clock::now();
+    //auto duration = duration_cast<microseconds>(stop - start);
 
-    OutputDebugString(("Time taken by function: " + std::to_string(duration.count() / 1000.0f) + " milliseconds\n").c_str());
+    //OutputDebugString(("Time taken by function: " + std::to_string(duration.count() / 1000.0f) + " milliseconds\n").c_str());
     
 }
 
@@ -268,9 +248,12 @@ void reshape(GLsizei width, GLsizei height) {
     gluPerspective(45.0f, aspect, 0.1f, 100.0f);
 }
 
-void glutTimer(int val) {
+void animLoop(int val) {
+
+    keyOperations();
+
     glutPostRedisplay();
-    glutTimerFunc(16, glutTimer, 1);
+    glutTimerFunc(16, animLoop, 1);
 }
 
 int main(int argc, char** argv) {
@@ -293,12 +276,12 @@ int main(int argc, char** argv) {
     /*interactions stuff*/
     glutKeyboardFunc(keyPressed); // Tell GLUT to use the method "keyPressed" for key presses  
     glutKeyboardUpFunc(keyUp); // Tell GLUT to use the method "keyUp" for key up events
-    glutPassiveMotionFunc(mouseMovement);
-    glutMotionFunc(mouseMovement);
-    glutSetCursor(GLUT_CURSOR_NONE);
+    //glutPassiveMotionFunc(mouseMovement);
+   // glutMotionFunc(mouseMovement);
+    //glutSetCursor(GLUT_CURSOR_NONE);
     glEnable(GL_CULL_FACE);
 
-    glutTimerFunc(1, glutTimer, 1);
+    glutTimerFunc(1, animLoop, 1);
 	glutMainLoop();
 	return 0;
 }

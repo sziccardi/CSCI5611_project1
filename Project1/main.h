@@ -25,11 +25,11 @@ Vec2 mouseAngles = Vec2(0, 0);
 float horizontal = 3.14f;
 float vertical = 0.0f;
 
-float cameraSpeed = 0.5f;
-float mouseSpeed = 0.01f;
+float cameraSpeed = 0.05f;
+float mouseSpeed = 0.0f;
 
 float previousFrame = 0.0f;
-float deltaTime = 0.0f;
+float deltaTime = 0.01667f;
 
 std::vector<Particle*> mParticles;
 int mMaxNumParticles = 10;
