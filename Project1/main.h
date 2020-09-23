@@ -9,6 +9,8 @@
 #include "particle.h"
 
 #define M_PI 3.14159265358979323846
+#define BUILDING_GRID_ROW 1
+#define BUIDLING_GRID_COL 1
 
 using namespace std::chrono;
 
@@ -25,11 +27,14 @@ Vec2 mouseAngles = Vec2(0, 0);
 float horizontal = 3.14f;
 float vertical = 0.0f;
 
-float cameraSpeed = 5.0f;
+float cameraSpeed = 2.5f;
+float moveMult = 5.0f;
 float mouseSpeed = 0.0f;
 
 float previousFrame = 0.0f;
 float deltaTime = 0.01667f;
+
+Matrix buildings[BUILDING_GRID_ROW][BUIDLING_GRID_COL] = {};
 
 std::vector<Particle*> mParticles;
 int mMaxNumParticles = 10;

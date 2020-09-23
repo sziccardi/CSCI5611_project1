@@ -61,7 +61,7 @@ void keyOperations(void) {
     cameraFront.normalize();// maybe not necessary
 
     if (keyStates[' ']) {
-        cameraPos += toVec3(cameraFront * dCam);
+        cameraPos += toVec3(cameraFront * dCam * moveMult);
     }
 }
 
@@ -177,7 +177,65 @@ void drawCube(Vec3 pos) {
     glPopMatrix();
 }
 
+void drawBuilding(Vec3 pos, Vec3 size) {
+    // Render a color-cube consisting of 6 quads with different colors
 
+    glPushMatrix();
+    glTranslatef(pos.x(), pos.y(), pos.z());
+
+    glBegin(GL_QUADS);
+    // Top face (y = 1.0f)
+    glColor3f(0.0f, 1.0f, 0.0f);     // Green
+    glVertex3f(0, size.y(), 0);
+    glVertex3f(size.x(), size.y(), 0);
+    glVertex3f(size.x(), size.y(), size.z());
+    glVertex3f(0, size.y(), size.z());
+
+    // Bottom face (y = -1.0f)
+    glColor3f(1.0f, 0.5f, 0.0f);     // Orange
+    glVertex3f(0, 0, 0);
+    glVertex3f(size.x(), 0, 0);
+    glVertex3f(size.x(), 0, size.z());
+    glVertex3f(0, 0, size.z());
+
+    // Front face  (z = 1.0f)
+    glColor3f(1.0f, 0.0f, 0.0f);     // Red
+    glVertex3f(0, pos.y(), 0);
+    glVertex3f(0, pos.y(),  size.z());
+    glVertex3f(0, size.y(), size.z());
+    glVertex3f(0, size.y(), 0);
+
+
+    // Back face (z = -1.0f)
+    glColor3f(1.0f, 1.0f, 0.0f);     // Yellow
+    glVertex3f(size.x(), 0, 0);
+    glVertex3f(size.x(), 0, size.z());
+    glVertex3f(size.x(), size.y(), size.z());
+    glVertex3f(size.x(), size.y(), 0);
+
+    // Left face (x = -1.0f)
+    glColor3f(0.0f, 0.0f, 1.0f);     // Blue
+    glVertex3f(0, 0, pos.z());
+    glVertex3f(size.x(), size.y(), 0);
+    glVertex3f(0, 0, 0);
+    glVertex3f(size.x(), size.y(), 0);
+
+    // Right face (x = 1.0f)
+    glColor3f(1.0f, 0.0f, 1.0f);     // Magenta
+    glVertex3f(0, 0, size.z());
+    glVertex3f(size.x(), size.y(), size.z());
+    glVertex3f(0, 0, 0);
+    glVertex3f(size.x(), size.y(), size.z());
+    glEnd();  // End of drawing color-cube
+    glPopMatrix();
+}
+
+
+void setupBuilding() {
+    Vec3 pos = Vec3(-1.0f, -1.0f, -1.0f);
+    Vec3 size = Vec3(50, buildingHeight, -buildingWidth);
+    
+}
 
 void drawGroundPlane()
 {
@@ -223,6 +281,7 @@ void display() {
     drawCube(Vec3(1.5f, 0.0f, -7.0f));
     drawGroundPlane();
     updateParticles(deltaTime);
+    setupBuilding();
 
     glutSwapBuffers();
     //auto stop = high_resolution_clock::now();
