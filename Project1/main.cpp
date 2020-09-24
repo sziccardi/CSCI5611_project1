@@ -83,15 +83,31 @@ void initParticles() {
         mParticles.push_back(new Particle(pos, Vec3(0.f, 0.f, 0.f), mParticleRadius, color));
     }
 
+    /*for testing particle collisions*/
+    //mParticles.push_back(new Particle(Vec3(0.f, 55.f, -55.f), Vec3(0.f, 0.f, 0.f), mParticleRadius, Vec3(1.f, 0.f, 0.f)));
+    //mParticles.push_back(new Particle(Vec3(0.f, 105.f, -55.f), Vec3(0.f, 0.f, 0.f), mParticleRadius, Vec3(0.f, 0.f, 1.f)));
+
 }
 
 void checkForParticleInteractions(Particle* p) {
-    
+    for (auto otherP : mParticles) {
+        if (otherP != p) {
+            Vec3 dist = toVec3(p->getCurrentPos() - otherP->getCurrentPos());
+            float minDist = p->getRadius() + otherP->getRadius() + 5.f;
+            if (dist.length() < minDist) {
+                //collision!
+                float amtToMove = abs(dist.length() - minDist);
+                p->reflectOffOf(toVec3(dist.normalized()), amtToMove);
+                otherP->reflectOffOf(toVec3(dist.normalized() * -1.f), amtToMove);
+            }
+        }
+    }
 }
 
 void checkForGroundInteraction(Particle* p) {
     if (p->getCurrentPos().y() < mGroundPlanePos + p->getRadius()) {
-        p->reflectOffOf(Vec3(0.f, 1.f, 0.f));
+        float amtToMove = abs(p->getCurrentPos().y() - (mGroundPlanePos + p->getRadius()));
+        p->reflectOffOf(Vec3(0.f, 1.f, 0.f), amtToMove);
     }
 }
 

@@ -110,14 +110,14 @@ void Particle::update(float dt)
 	}
 }
 
-void Particle::reflectOffOf(Vec3 normal) {
+void Particle::reflectOffOf(Vec3 normal, float amtToMove) {
 
 	Vec3 bounce = toVec3(mVelocity.projAB(normal));
 
 	Vec3 newVel = toVec3(mVelocity - (bounce * 1.8f));
 	mVelocity = newVel;
 
-	mPosition += toVec(normal * mRadius * 1.01f);
+	mPosition += toVec(normal * amtToMove * 1.01f);
 }
 
 void Particle::flock(vector<Particle> neighbors)

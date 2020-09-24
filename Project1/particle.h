@@ -32,7 +32,7 @@ public:
 	bool getIsAlive();
 
 	void update(float dt);
-	void reflectOffOf(Vec3 normal);
+	void reflectOffOf(Vec3 normal, float amtToMove);
 	void flock(vector<Particle> neighbors);
 
 protected:
@@ -48,7 +48,7 @@ protected:
 	bool mIsDying; // only need if we are going to impliment some sort of ease-out for dying
 	bool mIsDead;
 
-	float mMaxLifespan = 500.f; // in seconds
-	float mMinLifespan = 100.f;
+	float mMaxLifespan = 100.f; // in seconds
+	float mMinLifespan = 20.f;
 
 };
