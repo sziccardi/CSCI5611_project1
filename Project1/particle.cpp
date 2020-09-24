@@ -15,10 +15,10 @@ Particle::Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color) :
 void Particle::draw()
 {	
 	glColor3f(mColor.x(), mColor.y(), mColor.z());
-	//glPushMatrix();
+	glPushMatrix();
 	glTranslatef(mPosition.x(), mPosition.y(), mPosition.z());
 	glutSolidSphere(mRadius, 50, 50);
-	//glPopMatrix();
+	glPopMatrix();
 	glEnd();
 }
 
@@ -56,6 +56,11 @@ void Particle::addForce(Vec3 force)
 void Particle::setLifespan(float lifespan)
 {
 	mLifespan = lifespan;
+}
+
+float Particle::getRadius()
+{
+	return mRadius;
 }
 
 Vec3 Particle::getCurrentPos()
@@ -105,14 +110,14 @@ void Particle::update(float dt)
 	}
 }
 
-void Particle::reflectOffOf(Vec3 normal)
-{
+void Particle::reflectOffOf(Vec3 normal) {
+
 	Vec3 bounce = toVec3(mVelocity.projAB(normal));
 
 	Vec3 newVel = toVec3(mVelocity - (bounce * 1.8f));
 	mVelocity = newVel;
 
-	mPosition += (normal * mRadius * 1.01);
+	mPosition += toVec(normal * mRadius * 1.01f);
 }
 
 void Particle::flock(vector<Particle> neighbors)

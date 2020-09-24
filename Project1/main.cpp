@@ -61,16 +61,16 @@ void keyOperations(void) {
     cameraFront.normalize();// maybe not necessary
 
     if (keyStates[' ']) {
-        cameraPos += toVec3(cameraFront * dCam);
+        cameraPos += toVec3(cameraFront * dCam * 15.f);
     }
 }
 
 
 void initParticles() {
     for (int i = 0; i < mMaxNumParticles; i++) {
-        float x = (float)(rand() % 72 - 36.f);
-        float y = (float)(rand() % 72);
-        float z = (float)(rand() % 72 - 144.f);
+        float x = (float)(rand() % 120 - 66.f);
+        float y = (float)(rand() % 240 + 20.f);
+        float z = (float)(-1.0f * (rand() % 120));
         //float x = 0.f;
         //float y = 120.f;
         //float z = -120.f;
@@ -82,14 +82,15 @@ void initParticles() {
         Vec3 color = Vec3(r,g, b);
         mParticles.push_back(new Particle(pos, Vec3(0.f, 0.f, 0.f), mParticleRadius, color));
     }
+
 }
 
 void checkForParticleInteractions(Particle* p) {
-
+    
 }
 
 void checkForGroundInteraction(Particle* p) {
-    if (p->getCurrentPos().y() < mGroundPlanePos) {
+    if (p->getCurrentPos().y() < mGroundPlanePos + p->getRadius()) {
         p->reflectOffOf(Vec3(0.f, 1.f, 0.f));
     }
 }
@@ -152,14 +153,16 @@ void drawCube(Vec3 pos) {
 
 void drawGroundPlane() {
     glPushMatrix();
+    glTranslatef(0.f, 0.f, 0.f);
+    glScalef(mGroundPlaneSize, 1.f, mGroundPlaneSize);
 
     glBegin(GL_QUADS);
     // Top face (y = 1.0f)
-    glColor3f(1.0f, 0.0f, 1.0f);     
-    glVertex3f(mGroundPlaneSize, mGroundPlanePos, -mGroundPlaneSize);
-    glVertex3f(-mGroundPlaneSize, mGroundPlanePos, -mGroundPlaneSize);
-    glVertex3f(-mGroundPlaneSize, mGroundPlanePos, mGroundPlaneSize);
-    glVertex3f(mGroundPlaneSize, mGroundPlanePos, mGroundPlaneSize);
+    glColor3f(0.0f, 1.0f, 0.0f);     // Green
+    glVertex3f(1.0f, 0.0f, -1.0f);
+    glVertex3f(-1.0f, 0.0f, -1.0f);
+    glVertex3f(-1.0f, 0.0f, 1.0f);
+    glVertex3f(1.0f, 0.0f, 1.0f);
 
     glEnd();  // End of drawing ground plane
     glPopMatrix();
@@ -177,10 +180,10 @@ void updateParticles(float dt) {
         else {
             a->addForce(mGravity);
             a->update(dt);
-            checkForParticleInteractions(a); //TODO: does this need to be before the moving?
+            //checkForParticleInteractions(a); //TODO: does this need to be before the moving?
             checkForGroundInteraction(a);
-            checkForObstacleInteraction(a);
-            a->draw();
+            //checkForObstacleInteraction(a);
+            
             ++it;
         }
     }
@@ -200,7 +203,10 @@ void display() {
 
     drawCube(Vec3(50.5f, 0.0f, -36.0f));
     drawGroundPlane();
-    updateParticles(deltaTime);
+
+    for (auto it : mParticles) {
+        it->draw();
+    }
 
     glutSwapBuffers();
     //auto stop = high_resolution_clock::now();
@@ -235,6 +241,8 @@ void reshape(GLsizei width, GLsizei height) {
 
 void animLoop(int val) {
     keyOperations();
+
+    updateParticles(deltaTime);
 
     glutPostRedisplay();
     glutTimerFunc(16, animLoop, 1);

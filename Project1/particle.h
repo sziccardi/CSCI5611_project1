@@ -23,6 +23,7 @@ public:
 	void addForce(Vec3 force);
 	void setLifespan(float lifespan);
 
+	float getRadius();
 	Vec3 getCurrentPos();
 	Vec3 getCurrentColor();
 	float getCurrentSize();
