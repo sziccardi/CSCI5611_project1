@@ -41,22 +41,6 @@ float mouseSpeed = 0.0f;
 float previousFrame = 0.0f;
 float deltaTime = 0.01667f;
 
-
-std::vector<Particle*> mParticles;
-int mMaxNumParticles = 15;
-float mParticleRadius = 5.f;
-Vec3 mGravity = Vec3(0.f, -30.f, 0.f);
-
-Matrix buildings[BUILDING_GRID_ROW][BUILDING_GRID_COL] = {};
-std::vector<Obstacle*> mObstacles;
-float buildingMin = 5;
-int buildingSize = 10;
-int buildingHeightSize = 20;
-
-unsigned int buildingVBO, buildingVAO;
-unsigned int buildingTexture;
-int buildingShaderProgram;
-
 const char* vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
 "layout (location = 1) in vec2 aTexCoord;\n"
@@ -77,13 +61,14 @@ const char* fragmentShaderSource = "#version 330 core\n"
 "{\n"
 "   FragColor = texture(texture, TexCoord);\n"
 "}\n\0";
+
+/*Building related things*/
 float buildingTexCoords[] = {
     0.0f, 0.0f,  // lower-left corner  
     1.0f, 0.0f,  // lower-right corner
     1.0, 1.0f,   // upper-right corner
     0.0, 1.0f   // upper-left corner
 };
-
 float buildingVertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
          0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -127,8 +112,19 @@ float buildingVertices[] = {
         -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
         -0.5f, -0.5f,  0.5f,  0.0f, 1.0f
 };
+Matrix buildings[BUILDING_GRID_ROW][BUILDING_GRID_COL] = {};
+std::vector<Obstacle*> mObstacles;
+float buildingMin = 5;
+int buildingSize = 10;
+int buildingHeightSize = 20;
+unsigned int buildingVBO, buildingVAO;
+unsigned int buildingTexture;
+int buildingShaderProgram;
 
+void initObstacles();
+void drawObstacles();
 
+/*Ground plane related things*/
 float groundVertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
          0.5f, -0.5f, -0.5f,  5.0f, 0.0f,
@@ -141,17 +137,22 @@ float mGroundPlanePos = -1.f;
 float mGroundPlaneSize = 500.f;
 unsigned int groundVBO, groundVAO;
 unsigned int groundTexture;
+
 void initGroundPlane();
+void drawGroundPlane();
+
+/* Particle related things*/
+std::vector<Particle*> mParticles;
+int mMaxNumParticles = 15;
+float mParticleRadius = 5.f;
+Vec3 mGravity = Vec3(0.f, -30.f, 0.f);
 
 void initParticles();
 void checkForParticleInteractions(Particle* p);
 void checkForGroundInteraction(Particle* p);
 void checkForObstacleInteraction(Particle* p);
 void updateParticles(float dt);
-
-/* Specific draw functions */
-void drawCube(Vec3 pos);
-void drawGroundPlane();
+void drawParticles();
 
 /* Display loop */
 void display();

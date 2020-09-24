@@ -1,7 +1,7 @@
 #include "main.h"
 
 
-
+/*INPUTS*/
 void keyPressed(unsigned char key, int x, int y) {
     keyStates[key] = true;
 }
@@ -63,7 +63,7 @@ void keyOperations(void) {
     }
 }
 
-
+/*INIT  OBJECTS*/
 void initGroundPlane() {
     glGenVertexArrays(1, &groundVAO);
     glGenBuffers(1, &groundVBO);
@@ -174,11 +174,11 @@ void initObstacles() {
     // -------------------------------------------------------------------------------------------
     unsigned int vertex, fragment;
     vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &buildingVertexShaderSource, NULL);
+    glShaderSource(vertex, 1, &vertexShaderSource, NULL);
     glCompileShader(vertex);
     // fragment Shader
     fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &buildingFragmentShaderSource, NULL);
+    glShaderSource(fragment, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragment);
 
     buildingShaderProgram = glCreateProgram();
@@ -215,84 +215,7 @@ void initObstacles() {
     }
 }
 
-void checkForParticleInteractions(Particle* p) {
-    for (auto otherP : mParticles) {
-        if (otherP != p) {
-            Vec3 dist = toVec3(p->getCurrentPos() - otherP->getCurrentPos());
-            float minDist = p->getRadius() + otherP->getRadius();
-            if (dist.length() < minDist) {
-                //collision!
-                float amtToMove = abs(dist.length() - minDist);
-                p->reflectOffOf(toVec3(dist.normalized()), amtToMove);
-                otherP->reflectOffOf(toVec3(dist.normalized() * -1.f), amtToMove);
-            }
-        }
-    }
-}
-
-void checkForGroundInteraction(Particle* p) {
-    if (p->getCurrentPos().y() < mGroundPlanePos + p->getRadius()) {
-        float amtToMove = abs(p->getCurrentPos().y() - (mGroundPlanePos + p->getRadius()));
-        p->reflectOffOf(Vec3(0.f, 1.f, 0.f), amtToMove);
-    }
-}
-
-void checkForObstacleInteraction(Particle* p) {
-
-}
-
-void drawCube(Vec3 pos) {
-	// Render a color-cube consisting of 6 quads with different colors
-	
-    glPushMatrix();
-	glTranslatef(pos.x(), pos.y(), pos.z());
-
-	glBegin(GL_QUADS);
-    // Top face (y = 1.0f)
-    glColor3f(0.0f, 1.0f, 0.0f);     // Green
-    glVertex3f(1.0f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    glVertex3f(1.0f, 1.0f, 1.0f);
-
-    // Bottom face (y = -1.0f)
-    glColor3f(1.0f, 0.5f, 0.0f);     // Orange
-    glVertex3f(1.0f, -1.0f, 1.0f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(1.0f, -1.0f, -1.0f);
-
-    // Front face  (z = 1.0f)
-    glColor3f(1.0f, 0.0f, 0.0f);     // Red
-    glVertex3f(1.0f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-    glVertex3f(1.0f, -1.0f, 1.0f);
-
-    // Back face (z = -1.0f)
-    glColor3f(1.0f, 1.0f, 0.0f);     // Yellow
-    glVertex3f(1.0f, -1.0f, -1.0f);
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(1.0f, 1.0f, -1.0f);
-
-    // Left face (x = -1.0f)
-    glColor3f(0.0f, 0.0f, 1.0f);     // Blue
-    glVertex3f(-1.0f, 1.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, -1.0f);
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-
-    // Right face (x = 1.0f)
-    glColor3f(1.0f, 0.0f, 1.0f);     // Magenta
-    glVertex3f(1.0f, 1.0f, -1.0f);
-    glVertex3f(1.0f, 1.0f, 1.0f);
-    glVertex3f(1.0f, -1.0f, 1.0f);
-    glVertex3f(1.0f, -1.0f, -1.0f);
-    glEnd();  // End of drawing color-cube
-    glPopMatrix();
-}
-
+/*DRAWING*/
 void drawBuilding(Vec3 pos, Vec3 size) {
     // Render a color-cube consisting of 6 quads with different colors
 
@@ -388,6 +311,12 @@ void drawObstacles() {
     glPopMatrix();
 }
 
+void drawParticles() {
+    for (auto it : mParticles) {
+        it->draw();
+    }
+}
+
 void drawGroundPlane() {
     glPushMatrix();
     glBindBuffer(GL_ARRAY_BUFFER, groundVBO);
@@ -441,6 +370,7 @@ void drawGroundPlane() {
     //glPopMatrix();
 }
 
+/*MOTION*/
 void updateParticles(float dt) {
     auto it = begin(mParticles);
     while (it != end(mParticles)) {
@@ -462,6 +392,32 @@ void updateParticles(float dt) {
     }
 }
 
+void checkForParticleInteractions(Particle* p) {
+    for (auto otherP : mParticles) {
+        if (otherP != p) {
+            Vec3 dist = toVec3(p->getCurrentPos() - otherP->getCurrentPos());
+            float minDist = p->getRadius() + otherP->getRadius();
+            if (dist.length() < minDist) {
+                //collision!
+                float amtToMove = abs(dist.length() - minDist);
+                p->reflectOffOf(toVec3(dist.normalized()), amtToMove);
+                otherP->reflectOffOf(toVec3(dist.normalized() * -1.f), amtToMove);
+            }
+        }
+    }
+}
+
+void checkForGroundInteraction(Particle* p) {
+    if (p->getCurrentPos().y() < mGroundPlanePos + p->getRadius()) {
+        float amtToMove = abs(p->getCurrentPos().y() - (mGroundPlanePos + p->getRadius()));
+        p->reflectOffOf(Vec3(0.f, 1.f, 0.f), amtToMove);
+    }
+}
+
+void checkForObstacleInteraction(Particle* p) {
+
+}
+
 void display() {
     //auto start = high_resolution_clock::now();
 
@@ -474,13 +430,10 @@ void display() {
     glLoadIdentity();
     gluLookAt(cameraPos.x(), cameraPos.y(), cameraPos.z(), lookAt.x(), lookAt.y(), lookAt.z(), cameraUp.x(), cameraUp.y(), cameraUp.z());
 
-    drawCube(Vec3(50.5f, 0.0f, -36.0f));
     drawGroundPlane();
     drawObstacles();
-
-    for (auto it : mParticles) {
-        it->draw();
-    }
+    drawParticles();
+    
 
     glutSwapBuffers();
     //auto stop = high_resolution_clock::now();
