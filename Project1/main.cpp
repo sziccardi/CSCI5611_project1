@@ -113,6 +113,68 @@ void initParticles() {
 }
 
 void initObstacles() {
+    glGenVertexArrays(1, &buildingVAO);
+    glGenBuffers(1, &buildingVBO);
+
+    glBindVertexArray(buildingVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, buildingVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(buildingVertices), buildingVertices, GL_STATIC_DRAW);
+
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    // texture coord attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // texture 1
+    // ---------
+    glGenTextures(1, &buildingTexture);
+    glBindTexture(GL_TEXTURE_2D, buildingTexture);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    unsigned char* data = stbi_load("buildingTexture.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+
+    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
+    // -------------------------------------------------------------------------------------------
+    unsigned int vertex, fragment;
+    vertex = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex, 1, &buildingVertexShaderSource, NULL);
+    glCompileShader(vertex);
+    // fragment Shader
+    fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment, 1, &buildingFragmentShaderSource, NULL);
+    glCompileShader(fragment);
+
+    buildingShaderProgram = glCreateProgram();
+    glAttachShader(buildingShaderProgram, vertex);
+    glAttachShader(buildingShaderProgram, fragment);
+    glLinkProgram(buildingShaderProgram);
+
+    // delete the shaders as they're linked into our program now and no longer necessery
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+    glUseProgram(buildingShaderProgram);
+    glUniform1i(glGetUniformLocation(buildingShaderProgram, "texture"), 0);
+
 
     float currBuildX = -1.0f;
     float currBuildZ = -1.0f;
@@ -256,19 +318,36 @@ void drawBuilding(Vec3 pos, Vec3 size) {
 }
 
 void drawObstacles() {
+    glPushMatrix();
+    // bind textures on corresponding texture units
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, buildingTexture);
+    // activate shader
+    glUseProgram(buildingShaderProgram);
+
+    // pass projection matrix to shader (note that in this case it could change every frame)
+    glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)glutGet(GLUT_WINDOW_WIDTH) / (float)glutGet(GLUT_WINDOW_HEIGHT), 0.1f, 100.0f);
+    glUniformMatrix4fv(glGetUniformLocation(buildingShaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
+
+    // camera/view transformation
+    glm::vec3 newCameraPos = glm::vec3(cameraPos.x(), cameraPos.y(), cameraPos.z());
+    glm::vec3 newCameraFront = glm::vec3(cameraFront.x(), cameraFront.y(), cameraFront.z());
+    glm::vec3 newCameraUp = glm::vec3(cameraUp.x(), cameraUp.y(), cameraUp.z());
+    glm::mat4 view = glm::lookAt(newCameraPos, newCameraPos + newCameraFront, newCameraUp);
+    glUniformMatrix4fv(glGetUniformLocation(buildingShaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+
+    // render boxes
+    glBindVertexArray(buildingVAO);
+
+
     for (auto it : mObstacles) {
-        //it->update(dt);
-        //checkForParticleInteractions(it); //TODO: does this need to be before the moving?
-        it->draw(cameraPos, cameraFront, cameraUp);
+        auto model = it->draw(BUILDING_GRID_ROW);
+        glUniformMatrix4fv(glGetUniformLocation(buildingShaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
     }
+    glPopMatrix();
 }
-
-
-//void setupBuilding() {
-//    Vec3 pos = Vec3(-1.0f, 1.0f, -1.0f);
-//    Vec3 size = Vec3(50, buildingHeight, -buildingWidth);
-//    drawBuilding(pos, size);
-//}
 
 void drawGroundPlane()
 {
@@ -303,7 +382,6 @@ void display() {
     //auto start = high_resolution_clock::now();
 
     Vec3 lookAt = toVec3(cameraFront + cameraPos);
-    glewInit();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
@@ -372,6 +450,7 @@ int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 
 	/*display stuff*/
+    glEnable(GL_DEPTH_TEST);
     glutInitDisplayMode(GLUT_DOUBLE);
     //glutGameModeString("640x480:32@120");
     //glutEnterGameMode();
@@ -381,6 +460,7 @@ int main(int argc, char** argv) {
 	glutDisplayFunc(display);
     glutReshapeFunc(reshape);
 	initGL();
+    glewInit();
     
     /*particle stuff*/
     initParticles();
@@ -397,5 +477,9 @@ int main(int argc, char** argv) {
 
     glutTimerFunc(1, animLoop, 1);
 	glutMainLoop();
+
+    //glDeleteVertexArrays(1, &VAO);
+    //glDeleteBuffers(1, &VBO);
+    //glDeleteProgram(shaderProgram);
 	return 0;
 }

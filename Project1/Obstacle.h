@@ -4,6 +4,8 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "matrices.h"
 
@@ -16,7 +18,7 @@ public:
 	Obstacle(Vec3 initPos, Vec3 initSize, Vec3 color, char* textureFile);
 	~Obstacle();
 
-	void draw(Vec3 cameraPos, Vec3 cameraFront, Vec3 cameraUp);
+	glm::mat4 draw(float scale);
 	void moveTo(Vec3 newPos);
 	void shift(Vec3 deltaPos);
 	void setTexture(Vec3 color);
