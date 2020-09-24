@@ -9,7 +9,7 @@ Particle::Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color) :
 	mPosition(initPos), mVelocity(initVel), mRadius(radius), mColor(color), mCurrentForce(Vec3(0.f, 0.f, 0.f)),
 	mAge(0.f), mIsDying(false), mIsDead(false)
 { 
-	mLifespan = 500.f;//rand() % (int)mMaxLifespan;
+	mLifespan = rand() % (int)(mMaxLifespan - mMinLifespan) + mMinLifespan;
 }
 
 void Particle::draw()
@@ -83,8 +83,15 @@ Vec3 Particle::getCurrentVelocity()
 	return mVelocity;
 }
 
+bool Particle::getIsAlive()
+{
+	return !mIsDead;
+}
+
 void Particle::update(float dt)
 {
+	if (mIsDead) return;
+
 	mAge += dt;
 	if (mAge > mLifespan) {
 		mIsDead = true;
@@ -92,11 +99,8 @@ void Particle::update(float dt)
 		//F = ma assume m = 1
 		// delta v = F dt
 		// delta x = v dt
-		mCurrentForce += mGravity;
 		mVelocity += toVec3(mCurrentForce * dt);
-		//cout << "old pos: " << mPosition.toString() << " ";
 		mPosition += toVec3(mVelocity * dt);
-		//cout << " new pos: " << mPosition.toString() << endl;
 		mCurrentForce = Vec3(0.f, 0.f, 0.f);
 	}
 }

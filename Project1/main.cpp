@@ -68,16 +68,16 @@ void keyOperations(void) {
 
 void initParticles() {
     for (int i = 0; i < mMaxNumParticles; i++) {
-        //float x = (float)(rand() % 72 - 36.f);
-        //float y = (float)(rand() % 24);
-        //float z = (float)(rand() % 72 - 144.f);
-        float x = 0.f;
-        float y = 120.f;
-        float z = -120.f;
+        float x = (float)(rand() % 72 - 36.f);
+        float y = (float)(rand() % 72);
+        float z = (float)(rand() % 72 - 144.f);
+        //float x = 0.f;
+        //float y = 120.f;
+        //float z = -120.f;
         Vec3 pos = Vec3(x, y, z);
-        float r = 0.f;//static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-        float g = 1.0f;// static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-        float b = 0.f; // static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 
         Vec3 color = Vec3(r,g, b);
         mParticles.push_back(new Particle(pos, Vec3(0.f, 0.f, 0.f), mParticleRadius, color));
@@ -166,12 +166,23 @@ void drawGroundPlane() {
 }
 
 void updateParticles(float dt) {
-    for (auto it : mParticles) {
-        checkForParticleInteractions(it); //TODO: does this need to be before the moving?
-        checkForGroundInteraction(it);
-        checkForObstacleInteraction(it);
-        it->update(dt);
-        it->draw();
+    auto it = begin(mParticles);
+    while (it != end(mParticles)) {
+        // Do some stuff
+        auto a = (Particle*)*it;
+        if (!a->getIsAlive()) {
+            delete a;
+            it = mParticles.erase(it);
+        }
+        else {
+            a->addForce(mGravity);
+            a->update(dt);
+            checkForParticleInteractions(a); //TODO: does this need to be before the moving?
+            checkForGroundInteraction(a);
+            checkForObstacleInteraction(a);
+            a->draw();
+            ++it;
+        }
     }
 }
 

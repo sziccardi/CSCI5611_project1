@@ -32,8 +32,9 @@ float previousFrame = 0.0f;
 float deltaTime = 0.01667f;
 
 std::vector<Particle*> mParticles;
-int mMaxNumParticles = 1;
+int mMaxNumParticles = 20;
 float mParticleRadius = 5.f;
+Vec3 mGravity = Vec3(0.f, -30.f, 0.f);
 
 float buildingMin = 20;
 int buildingSize = 70;
