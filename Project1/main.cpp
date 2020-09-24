@@ -93,7 +93,7 @@ void checkForParticleInteractions(Particle* p) {
     for (auto otherP : mParticles) {
         if (otherP != p) {
             Vec3 dist = toVec3(p->getCurrentPos() - otherP->getCurrentPos());
-            float minDist = p->getRadius() + otherP->getRadius() + 5.f;
+            float minDist = p->getRadius() + otherP->getRadius();
             if (dist.length() < minDist) {
                 //collision!
                 float amtToMove = abs(dist.length() - minDist);
@@ -196,7 +196,7 @@ void updateParticles(float dt) {
         else {
             a->addForce(mGravity);
             a->update(dt);
-            //checkForParticleInteractions(a); //TODO: does this need to be before the moving?
+            checkForParticleInteractions(a); //TODO: does this need to be before the moving?
             checkForGroundInteraction(a);
             //checkForObstacleInteraction(a);
             
