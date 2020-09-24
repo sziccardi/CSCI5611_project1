@@ -1,23 +1,86 @@
 #include "Obstacle.h"
 #include "bmp.h"
 #include "stb_image.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp> //translate, rotate, scale, perspective 
+#include <glm/gtc/type_ptr.hpp>
 //#include "Shader.h"
 
+const char* vertexShaderSource = "#version 330 core\n"
+"layout (location = 0) in vec3 aPos;\n"
+"layout (location = 1) in vec2 aTexCoord;\n"
+"out vec2 TexCoord;\n"
+"uniform mat4 model; \n"
+"uniform mat4 view; \n"
+"uniform mat4 projection; \n"
+"void main()\n"
+"{\n"
+"   gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+"   TexCoord = vec2(aTexCoord.x, aTexCoord.y);\n"
+"}\0";
+const char* fragmentShaderSource = "#version 330 core\n"
+"out vec4 FragColor;\n"
+"in vec2 TexCoord;\n"
+"uniform sampler2D texture;\n"
+"void main()\n"
+"{\n"
+"   FragColor = texture(texture, TexCoord);\n"
+"}\n\0";
 
 float texCoords[] = {
     0.0f, 0.0f,  // lower-left corner  
     1.0f, 0.0f,  // lower-right corner
-    0.5f, 1.0f   // top-center corner
+    1.0, 1.0f,   // upper-right corner
+    0.0, 1.0f   // upper-left corner
 }; 
 
 float vertices[] = {
-    // positions          // colors           // texture coords
-     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
 
+unsigned int VBO, VAO;
+unsigned int texture;
+int shaderProgram;
 
 Obstacle::Obstacle() :
 	mPosition(Vec3(0.f, 0.f, 0.f)), mSize(Vec3(0.f, 0.f, 0.f)), mColor(Vec3(0.f, 0.f, 0.f))
@@ -27,105 +90,113 @@ Obstacle::Obstacle(Vec3 initPos, Vec3 initSize, Vec3 color, char* inputTextureFi
 	mPosition(initPos), mSize(initSize), mColor(color), textureFile(inputTextureFile)
 {
    // texture = loadBMP_custom(inputTextureFile) ;
-    setupTexture(inputTextureFile);
+    setupShader(inputTextureFile);
    
 }
 
+Obstacle::~Obstacle() {
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteProgram(shaderProgram);
+}
 
-void Obstacle::setupTexture(char* filename) {
 
-   // Shader ourShader("VertexShader.hlsl", "ComputeShader.hlsl");
+void Obstacle::setupShader(char* filename) {
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
 
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    // texture coord attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // texture 1
+    // ---------
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
-
+    // set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+    // load image, create texture and generate mipmaps
     int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
     unsigned char* data = stbi_load(filename, &width, &height, &nrChannels, 0);
-
-    if (data) {
+    if (data)
+    {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
-    } else {
-        OutputDebugString("Failed to load texture");
     }
-
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
     stbi_image_free(data);
 
-   ///* glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-   // glEnableVertexAttribArray(2);*/
+    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
+    // -------------------------------------------------------------------------------------------
+    unsigned int vertex, fragment;
+    vertex = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertex);
+    // fragment Shader
+    fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragment);
+
+    shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertex);
+    glAttachShader(shaderProgram, fragment);
+    glLinkProgram(shaderProgram);
+    
+    // delete the shaders as they're linked into our program now and no longer necessery
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+    glUseProgram(shaderProgram);
+    glUniform1i(glGetUniformLocation(shaderProgram,"texture"), 0);
 }
 
 
 
 
-void Obstacle::draw()
+void Obstacle::draw(Vec3 cameraPos, Vec3 cameraFront, Vec3 cameraUp)
 {
-    glPushMatrix();
-    glTranslatef(mPosition.x(), mPosition.y(), mPosition.z());
-
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    // bind textures on corresponding texture units
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
+    // activate shader
+    glUseProgram(shaderProgram);
 
-    glBegin(GL_QUADS);
-    // Top face (y = 1.0f)
-    glColor3f(1.0f, 1.0f, 1.0f);     // Green
-    glTexCoord2f(0, 0);
-    glVertex3f(0, mSize.y(), 0);
-    glTexCoord2f(1, 0);
-    glVertex3f(mSize.x(), mSize.y(), 0);
-    glTexCoord2f(1, 1);
-    glVertex3f(mSize.x(), mSize.y(), mSize.z());
-    glTexCoord2f(0, 1);
-    glVertex3f(0, mSize.y(), mSize.z());
+    // pass projection matrix to shader (note that in this case it could change every frame)
+    glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)glutGet(GLUT_WINDOW_WIDTH) / (float)glutGet(GLUT_WINDOW_HEIGHT), 0.1f, 100.0f);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
 
-    // Bottom face (y = -1.0f)
-    glColor3f(1.0f, 0.5f, 0.0f);     // Orange
-    glVertex3f(0, 0, 0);
-    glVertex3f(mSize.x(), 0, 0);
-    glVertex3f(mSize.x(), 0, mSize.z());
-    glVertex3f(0, 0, mSize.z());
+    // camera/view transformation
+    glm::vec3 newCameraPos = glm::vec3(cameraPos.x(), cameraPos.y(), cameraPos.z());
+    glm::vec3 newCameraFront = glm::vec3(cameraFront.x(), cameraFront.y(), cameraFront.z());
+    glm::vec3 newCameraUp = glm::vec3(cameraUp.x(), cameraUp.y(), cameraUp.z());
+    glm::mat4 view = glm::lookAt(newCameraPos, newCameraPos + newCameraFront, newCameraUp);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
 
-    // Front face  (z = 1.0f)
-    glColor3f(1.0f, 0.0f, 0.0f);     // Red
-    glVertex3f(0, 0, 0);
-    glVertex3f(0, mSize.y(), 0);
-    glVertex3f(0, mSize.y(), mSize.z());
-    glVertex3f(0, 0, mSize.z());
+    // render boxes
+    glBindVertexArray(VAO);
 
+    // calculate the model matrix for each object and pass it to shader before drawing
+    glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+    glm::vec3 newPos = glm::vec3(mPosition.x(), mPosition.y(), mPosition.z());
+    model = glm::translate(model, newPos);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 
-    // Back face (z = -1.0f)
-    glColor3f(1.0f, 1.0f, 0.0f);     // Yellow
-    glVertex3f(mSize.x(), 0, 0);
-    glVertex3f(mSize.x(), 0, mSize.z());
-    glVertex3f(mSize.x(), mSize.y(), mSize.z());
-    glVertex3f(mSize.x(), mSize.y(), 0);
-
-    // Left face (x = -1.0f)
-    glColor3f(0.0f, 0.0f, 1.0f);     // Blue
-    glVertex3f(0, 0, 0);
-    glVertex3f(mSize.x(), 0, 0);
-    glVertex3f(mSize.x(), mSize.y(), 0);
-    glVertex3f(0, mSize.y(), 0);
-
-
-    // Right face (x = 1.0f)
-    glColor3f(1.0f, 0.0f, 1.0f);     // Magenta
-    glVertex3f(0, 0, mSize.z());
-    glVertex3f(0, mSize.y(), mSize.z());
-    glVertex3f(mSize.x(), mSize.y(), mSize.z());
-    glVertex3f(mSize.x(), 0, mSize.z());
-    glEnd();  // End of drawing color-cube
-    glDisable(GL_TEXTURE_2D);
-    glPopMatrix();
-    
+    glDrawArrays(GL_TRIANGLES, 0, 36);    
 }
 
 void Obstacle::moveTo(Vec3 newPos)

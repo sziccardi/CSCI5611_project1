@@ -14,14 +14,15 @@ public:
 	
 	Obstacle();
 	Obstacle(Vec3 initPos, Vec3 initSize, Vec3 color, char* textureFile);
+	~Obstacle();
 
-	void draw();
+	void draw(Vec3 cameraPos, Vec3 cameraFront, Vec3 cameraUp);
 	void moveTo(Vec3 newPos);
 	void shift(Vec3 deltaPos);
 	void setTexture(Vec3 color);
 	void setSize(Vec3 newSize);
 	void update(float dt);
-	void setupTexture(char* filename);
+	void setupShader(char* filename);
 
 	Vec3 getCurrentPos();
 	Vec3 getCurrentTexture();

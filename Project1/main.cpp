@@ -129,7 +129,7 @@ void initObstacles() {
             Vec3 size = Vec3(10, buildingHeight, -buildingWidth);
 
             Vec3 color = Vec3(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-            mObstacles.push_back(new Obstacle(pos, size, color, "nothing"));
+            mObstacles.push_back(new Obstacle(pos, size, color, "buildingTexture.png"));
 
             currBuildX += gridSpacing;
         }
@@ -259,7 +259,7 @@ void drawObstacles() {
     for (auto it : mObstacles) {
         //it->update(dt);
         //checkForParticleInteractions(it); //TODO: does this need to be before the moving?
-        it->draw();
+        it->draw(cameraPos, cameraFront, cameraUp);
     }
 }
 
@@ -303,6 +303,7 @@ void display() {
     //auto start = high_resolution_clock::now();
 
     Vec3 lookAt = toVec3(cameraFront + cameraPos);
+    glewInit();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);

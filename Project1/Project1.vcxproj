@@ -81,7 +81,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\gl\glew-2.1.0\glew-2.1.0\include;C:\gl\freeglut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\gl\glew-2.1.0\glew-2.1.0\include;C:\gl\freeglut\include;C:\gl\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\gl\glew-2.1.0\glew-2.1.0\lib\Release\x64;C:\gl\freeglut\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -109,7 +109,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\gl\glew-2.1.0\glew-2.1.0\include;C:\gl\freeglut\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\gl\glm;C:\gl\glew-2.1.0\glew-2.1.0\include;C:\gl\freeglut\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
