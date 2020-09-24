@@ -23,14 +23,16 @@ public:
 	void addForce(Vec3 force);
 	void setLifespan(float lifespan);
 
+	float getRadius();
 	Vec3 getCurrentPos();
 	Vec3 getCurrentColor();
 	float getCurrentSize();
 	float getAge();
 	Vec3 getCurrentVelocity();
+	bool getIsAlive();
 
 	void update(float dt);
-	void reflectOffOf(Vec3 normal);
+	void reflectOffOf(Vec3 normal, float amtToMove);
 	void flock(vector<Particle> neighbors);
 
 protected:
@@ -46,6 +48,7 @@ protected:
 	bool mIsDying; // only need if we are going to impliment some sort of ease-out for dying
 	bool mIsDead;
 
-	float mMaxLifespan = 10.f; // in seconds
+	float mMaxLifespan = 100.f; // in seconds
+	float mMinLifespan = 20.f;
 
 };

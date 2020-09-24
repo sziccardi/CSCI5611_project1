@@ -22,12 +22,12 @@ using namespace std::chrono;
 
 /* References */
 //https://learnopengl.com/Getting-started/Camera
-//
+//https://learnopengl.com/Getting-started/Textures
 
 unsigned char keyStates[256] = { 0 };
 
-Vec3 cameraPos = Vec3(0.0f, 1.0f, 0.0f);
-Vec3 cameraFront = Vec3(1.5f, 0.0f, -7.0f);
+Vec3 cameraPos = Vec3(0.0f, 72.0f, 0.0f);
+Vec3 cameraFront = Vec3(0.f, -1.0f, -5.0f);
 Vec3 cameraUp = Vec3(0.0f, 1.0f, 0.0f);
 Vec2 mouseAngles = Vec2(0, 0);
 
@@ -43,9 +43,9 @@ float deltaTime = 0.01667f;
 
 
 std::vector<Particle*> mParticles;
-int mMaxNumParticles = 10;
-
-float mParticleRadius = 0.5f;
+int mMaxNumParticles = 15;
+float mParticleRadius = 5.f;
+Vec3 mGravity = Vec3(0.f, -30.f, 0.f);
 
 Matrix buildings[BUILDING_GRID_ROW][BUILDING_GRID_COL] = {};
 std::vector<Obstacle*> mObstacles;
@@ -128,8 +128,25 @@ float buildingVertices[] = {
         -0.5f, -0.5f,  0.5f,  0.0f, 1.0f
 };
 
+
+float groundVertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  5.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  5.0f, 5.0f,
+         0.5f, -0.5f,  0.5f,  5.0f, 5.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 5.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f
+};
+float mGroundPlanePos = -1.f;
+float mGroundPlaneSize = 500.f;
+unsigned int groundVBO, groundVAO;
+unsigned int groundTexture;
+void initGroundPlane();
+
 void initParticles();
 void checkForParticleInteractions(Particle* p);
+void checkForGroundInteraction(Particle* p);
+void checkForObstacleInteraction(Particle* p);
 void updateParticles(float dt);
 
 /* Specific draw functions */
@@ -144,3 +161,8 @@ void display();
 void initGL();
 //Handler for window re-size event.
 void reshape(GLsizei width, GLsizei height);
+
+/* Input handlers */
+void keyPressed(unsigned char key, int x, int y);
+void keyUp(unsigned char key, int x, int y);
+void keyOperations(void);

@@ -59,57 +59,74 @@ void keyOperations(void) {
     cameraFront.normalize();// maybe not necessary
 
     if (keyStates[' ']) {
-        cameraPos += toVec3(cameraFront * dCam * moveMult);
+        cameraPos += toVec3(cameraFront * dCam * 15.f);
     }
 }
 
-void mouseMovement(int x, int y) {
 
-    mouseAngles.setVal(0, 0, x);
-    mouseAngles.setVal(1, 0, y);
-    //static bool wrap = false;
+void initGroundPlane() {
+    glGenVertexArrays(1, &groundVAO);
+    glGenBuffers(1, &groundVBO);
 
-    //if (!wrap) {
-        int ww = glutGet(GLUT_WINDOW_WIDTH);
-        int wh = glutGet(GLUT_WINDOW_HEIGHT);
+    glBindVertexArray(groundVAO);
 
-    //    int dx = x - ww / 2;
-    //    int dy = y - wh / 2;
+    glBindBuffer(GL_ARRAY_BUFFER, groundVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(groundVertices), groundVertices, GL_STATIC_DRAW);
 
-    //    // Do something with dx and dy here
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    // texture coord attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
-    //    mouseAngles.setVal(0, 0, mouseAngles.x() + dx * mouseSpeed);
-    //    mouseAngles.setVal(1, 0, mouseAngles.y() + dy * mouseSpeed);
-
-    //    if (mouseAngles.x() < -M_PI)
-    //        mouseAngles.setVal(0, 0, mouseAngles.x() + M_PI * 2);
-
-    //    else if (mouseAngles.x() > M_PI)
-    //        mouseAngles.setVal(0, 0, mouseAngles.x() - M_PI * 2);
-
-    //    if (mouseAngles.y() < -M_PI / 2)
-    //        mouseAngles.setVal(1, 0, -M_PI / 2);
-    //    if (mouseAngles.y() > M_PI / 2)
-    //        mouseAngles.setVal(1, 0, M_PI / 2);
-
-
-    //    cameraFront.setVal(0, 0, cos(mouseAngles.y() * sin(mouseAngles.x())))
-
-    //    // move mouse pointer back to the center of the window
-    //    wrap = true;
-        glutWarpPointer(ww / 2, wh / 2);
-    //}
-    //else {
-    //    wrap = false;
-    //}
+    // texture 2
+    // ---------
+    glGenTextures(1, &groundTexture);
+    glBindTexture(GL_TEXTURE_2D, groundTexture);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    unsigned char* data = stbi_load("groundTexture.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
 }
 
 void initParticles() {
     for (int i = 0; i < mMaxNumParticles; i++) {
-        Vec3 pos = Vec3(rand() % 10 - 5.f, rand() % 10 - 5.f, rand() % 10 - 12.f);
-        Vec3 color = Vec3(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+        float x = (float)(rand() % 120 - 66.f);
+        float y = (float)(rand() % 240 + 20.f);
+        float z = (float)(-1.0f * (rand() % 120));
+        //float x = 0.f;
+        //float y = 120.f;
+        //float z = -120.f;
+        Vec3 pos = Vec3(x, y, z);
+        float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+        Vec3 color = Vec3(r,g, b);
         mParticles.push_back(new Particle(pos, Vec3(0.f, 0.f, 0.f), mParticleRadius, color));
     }
+
+    /*for testing particle collisions*/
+    //mParticles.push_back(new Particle(Vec3(0.f, 55.f, -55.f), Vec3(0.f, 0.f, 0.f), mParticleRadius, Vec3(1.f, 0.f, 0.f)));
+    //mParticles.push_back(new Particle(Vec3(0.f, 105.f, -55.f), Vec3(0.f, 0.f, 0.f), mParticleRadius, Vec3(0.f, 0.f, 1.f)));
+
 }
 
 void initObstacles() {
@@ -175,11 +192,9 @@ void initObstacles() {
     glUseProgram(buildingShaderProgram);
     glUniform1i(glGetUniformLocation(buildingShaderProgram, "texture"), 0);
 
-
-    float currBuildX = -1.0f;
-    float currBuildZ = -1.0f;
-    
     float gridSpacing = buildingMin + buildingSize;
+    float currBuildX = -BUILDING_GRID_ROW * gridSpacing / 2.f;
+    float currBuildZ = -BUILDING_GRID_COL * gridSpacing / 2.f;
 
     for (int r = 0; r < BUILDING_GRID_ROW; r++) {
         for (int c = 0; c < BUILDING_GRID_COL; c++) {
@@ -191,24 +206,39 @@ void initObstacles() {
             Vec3 size = Vec3(10, buildingHeight, -buildingWidth);
 
             Vec3 color = Vec3(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-            mObstacles.push_back(new Obstacle(pos, size, color, "buildingTexture.png"));
+            mObstacles.push_back(new Obstacle(pos, size, color, "groundTexture.png"));
 
             currBuildX += gridSpacing;
         }
-        currBuildX = -1.0f;
+        currBuildX = -BUILDING_GRID_ROW * gridSpacing / 2.f;
         currBuildZ += gridSpacing;
     }
 }
 
-void checkForParticleInteractions(Particle* p)
-{
+void checkForParticleInteractions(Particle* p) {
+    for (auto otherP : mParticles) {
+        if (otherP != p) {
+            Vec3 dist = toVec3(p->getCurrentPos() - otherP->getCurrentPos());
+            float minDist = p->getRadius() + otherP->getRadius();
+            if (dist.length() < minDist) {
+                //collision!
+                float amtToMove = abs(dist.length() - minDist);
+                p->reflectOffOf(toVec3(dist.normalized()), amtToMove);
+                otherP->reflectOffOf(toVec3(dist.normalized() * -1.f), amtToMove);
+            }
+        }
+    }
 }
 
-void moveParticles(float dt)
-{
-    for (auto particle : mParticles) {
-        particle->update(dt);
+void checkForGroundInteraction(Particle* p) {
+    if (p->getCurrentPos().y() < mGroundPlanePos + p->getRadius()) {
+        float amtToMove = abs(p->getCurrentPos().y() - (mGroundPlanePos + p->getRadius()));
+        p->reflectOffOf(Vec3(0.f, 1.f, 0.f), amtToMove);
     }
+}
+
+void checkForObstacleInteraction(Particle* p) {
+
 }
 
 void drawCube(Vec3 pos) {
@@ -319,6 +349,15 @@ void drawBuilding(Vec3 pos, Vec3 size) {
 
 void drawObstacles() {
     glPushMatrix();
+    
+    glBindBuffer(GL_ARRAY_BUFFER, buildingVBO);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    // texture coord attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
     // bind textures on corresponding texture units
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, buildingTexture);
@@ -349,36 +388,81 @@ void drawObstacles() {
     glPopMatrix();
 }
 
-void drawGroundPlane()
-{
+void drawGroundPlane() {
     glPushMatrix();
+    glBindBuffer(GL_ARRAY_BUFFER, groundVBO);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    // texture coord attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    // bind textures on corresponding texture units
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, groundTexture);
+    // activate shader
+    glUseProgram(buildingShaderProgram);
 
-    glBegin(GL_QUADS);
-    // Top face (y = 1.0f)
-    glColor3f(1.0f, 0.0f, 1.0f);     
-    glVertex3f(100.0f, -1.0f, -100.0f);
-    glVertex3f(-100.0f, -1.0f, -100.0f);
-    glVertex3f(-100.0f, -1.0f, 100.0f);
-    glVertex3f(100.0f, -1.0f, 100.0f);
+    // pass projection matrix to shader (note that in this case it could change every frame)
+    glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)glutGet(GLUT_WINDOW_WIDTH) / (float)glutGet(GLUT_WINDOW_HEIGHT), 0.1f, 100.0f);
+    glUniformMatrix4fv(glGetUniformLocation(buildingShaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
 
-    glEnd();  // End of drawing ground plane
+    // camera/view transformation
+    glm::vec3 newCameraPos = glm::vec3(cameraPos.x(), cameraPos.y(), cameraPos.z());
+    glm::vec3 newCameraFront = glm::vec3(cameraFront.x(), cameraFront.y(), cameraFront.z());
+    glm::vec3 newCameraUp = glm::vec3(cameraUp.x(), cameraUp.y(), cameraUp.z());
+    glm::mat4 view = glm::lookAt(newCameraPos, newCameraPos + newCameraFront, newCameraUp);
+    glUniformMatrix4fv(glGetUniformLocation(buildingShaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+
+    // render boxes
+    glBindVertexArray(buildingVAO);
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::scale(model, glm::vec3(100.f, 1.f, 100.f));
+    glUniformMatrix4fv(glGetUniformLocation(buildingShaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
     glPopMatrix();
+
+
+    //glPushMatrix();
+    //glTranslatef(0.f, 0.f, 0.f);
+    //glScalef(mGroundPlaneSize, 1.f, mGroundPlaneSize);
+
+    //glBegin(GL_QUADS);
+    //// Top face (y = 1.0f)
+    //glColor3f(0.0f, 1.0f, 0.0f);     // Green
+    //glVertex3f(1.0f, 0.0f, -1.0f);
+    //glVertex3f(-1.0f, 0.0f, -1.0f);
+    //glVertex3f(-1.0f, 0.0f, 1.0f);
+    //glVertex3f(1.0f, 0.0f, 1.0f);
+
+    //glEnd();  // End of drawing ground plane
+    //glPopMatrix();
 }
 
 void updateParticles(float dt) {
-    for (auto it : mParticles) {
-        //it->update(dt);
-        //checkForParticleInteractions(it); //TODO: does this need to be before the moving?
-        it->draw();
+    auto it = begin(mParticles);
+    while (it != end(mParticles)) {
+        // Do some stuff
+        auto a = (Particle*)*it;
+        if (!a->getIsAlive()) {
+            delete a;
+            it = mParticles.erase(it);
+        }
+        else {
+            a->addForce(mGravity);
+            a->update(dt);
+            checkForParticleInteractions(a); //TODO: does this need to be before the moving?
+            checkForGroundInteraction(a);
+            //checkForObstacleInteraction(a);
+            
+            ++it;
+        }
     }
 }
 
 void display() {
-    //update time info
-    //float currTime = glutGet(GLUT_ELAPSED_TIME) / 1000;
-   // deltaTime = currTime - previousFrame;
-    //previousFrame = currTime;
-
     //auto start = high_resolution_clock::now();
 
     Vec3 lookAt = toVec3(cameraFront + cameraPos);
@@ -390,17 +474,19 @@ void display() {
     glLoadIdentity();
     gluLookAt(cameraPos.x(), cameraPos.y(), cameraPos.z(), lookAt.x(), lookAt.y(), lookAt.z(), cameraUp.x(), cameraUp.y(), cameraUp.z());
 
-    drawCube(Vec3(1.5f, 0.0f, -7.0f));
+    drawCube(Vec3(50.5f, 0.0f, -36.0f));
     drawGroundPlane();
-    updateParticles(deltaTime);
     drawObstacles();
+
+    for (auto it : mParticles) {
+        it->draw();
+    }
 
     glutSwapBuffers();
     //auto stop = high_resolution_clock::now();
     //auto duration = duration_cast<microseconds>(stop - start);
 
-    //OutputDebugString(("Time taken by function: " + std::to_string(duration.count() / 1000.0f) + " milliseconds\n").c_str());
-    
+    //OutputDebugString(("Time taken by function: " + std::to_string(duration.count() / 1000.0f) + " milliseconds\n").c_str());   
 }
 
 void mouse(int button, int state, int x, int y) {
@@ -435,12 +521,13 @@ void reshape(GLsizei width, GLsizei height) {
     glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
     glLoadIdentity();             // Reset
     // Enable perspective projection with fovy, aspect, zNear and zFar
-    gluPerspective(45.0f, aspect, 0.1f, 100.0f);
+    gluPerspective(45.0f, aspect, 0.1f, 1000.0f);
 }
 
 void animLoop(int val) {
-
     keyOperations();
+
+    updateParticles(deltaTime);
 
     glutPostRedisplay();
     glutTimerFunc(16, animLoop, 1);
@@ -452,8 +539,6 @@ int main(int argc, char** argv) {
 	/*display stuff*/
     glEnable(GL_DEPTH_TEST);
     glutInitDisplayMode(GLUT_DOUBLE);
-    //glutGameModeString("640x480:32@120");
-    //glutEnterGameMode();
     glutInitWindowSize(640, 480);
     glutInitWindowPosition(50, 50);
 	glutCreateWindow("Project 1");
@@ -465,6 +550,7 @@ int main(int argc, char** argv) {
     /*particle stuff*/
     initParticles();
     initObstacles();
+    initGroundPlane();
 
     /*interactions stuff*/
     glutKeyboardFunc(keyPressed); // Tell GLUT to use the method "keyPressed" for key presses  
@@ -473,7 +559,6 @@ int main(int argc, char** argv) {
    // glutMotionFunc(mouseMovement);
     //glutSetCursor(GLUT_CURSOR_NONE);
     glutMouseFunc(mouse);
-    glEnable(GL_CULL_FACE);
 
     glutTimerFunc(1, animLoop, 1);
 	glutMainLoop();

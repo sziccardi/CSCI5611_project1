@@ -9,16 +9,16 @@ Particle::Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color) :
 	mPosition(initPos), mVelocity(initVel), mRadius(radius), mColor(color), mCurrentForce(Vec3(0.f, 0.f, 0.f)),
 	mAge(0.f), mIsDying(false), mIsDead(false)
 { 
-	mLifespan = rand() % (int)mMaxLifespan;
+	mLifespan = rand() % (int)(mMaxLifespan - mMinLifespan) + mMinLifespan;
 }
 
 void Particle::draw()
 {	
 	glColor3f(mColor.x(), mColor.y(), mColor.z());
-	//glPushMatrix();
+	glPushMatrix();
 	glTranslatef(mPosition.x(), mPosition.y(), mPosition.z());
 	glutSolidSphere(mRadius, 50, 50);
-	//glPopMatrix();
+	glPopMatrix();
 	glEnd();
 }
 
@@ -58,6 +58,11 @@ void Particle::setLifespan(float lifespan)
 	mLifespan = lifespan;
 }
 
+float Particle::getRadius()
+{
+	return mRadius;
+}
+
 Vec3 Particle::getCurrentPos()
 {
 	return mPosition;
@@ -83,8 +88,15 @@ Vec3 Particle::getCurrentVelocity()
 	return mVelocity;
 }
 
+bool Particle::getIsAlive()
+{
+	return !mIsDead;
+}
+
 void Particle::update(float dt)
 {
+	if (mIsDead) return;
+
 	mAge += dt;
 	if (mAge > mLifespan) {
 		mIsDead = true;
@@ -98,14 +110,14 @@ void Particle::update(float dt)
 	}
 }
 
-void Particle::reflectOffOf(Vec3 normal)
-{
+void Particle::reflectOffOf(Vec3 normal, float amtToMove) {
+
 	Vec3 bounce = toVec3(mVelocity.projAB(normal));
 
 	Vec3 newVel = toVec3(mVelocity - (bounce * 1.8f));
 	mVelocity = newVel;
 
-	mPosition += (normal * mRadius * 1.01);
+	mPosition += toVec(normal * amtToMove * 1.01f);
 }
 
 void Particle::flock(vector<Particle> neighbors)
