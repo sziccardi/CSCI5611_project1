@@ -243,3 +243,5 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/Project1/VertexShader.hlsl
+/Project1/ComputeShader.hlsl

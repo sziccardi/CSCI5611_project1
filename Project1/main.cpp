@@ -129,7 +129,7 @@ void initObstacles() {
             Vec3 size = Vec3(10, buildingHeight, -buildingWidth);
 
             Vec3 color = Vec3(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-            mObstacles.push_back(new Obstacle(pos, size, color));
+            mObstacles.push_back(new Obstacle(pos, size, color, "nothing"));
 
             currBuildX += gridSpacing;
         }
