@@ -32,10 +32,13 @@ public:
 	float getAge();
 	Vec3 getCurrentVelocity();
 	bool getIsAlive();
+	float getFadeOn() { return mFadeOn; }
+	bool getIsFlocking() { return mIsFlocking; }
+	void setIsFlocking(bool flock) { mIsFlocking = flock; }
 
 	void update(float dt);
 	void reflectOffOf(Vec3 normal, float amtToMove);
-	void flock(Vec3 averageNormalVel, Vec3 averagePos, Vec3 averageDiff);
+	void flock(Vec3 averageNormalVel, Vec3 averagePos);
 	Vec3 getCurrentRot() { return mCurrentRot; }
 	void setCurrentRot(Vec3 newDir) { mCurrentRot = newDir; }
 
@@ -48,6 +51,7 @@ protected:
 	Vec3 mCurrentRot;
 
 	float mLifespan;
+	float mFadeOn;
 	float mAge;
 
 	bool mIsDying; // only need if we are going to impliment some sort of ease-out for dying
@@ -56,7 +60,8 @@ protected:
 	float mMaxLifespan = 20.0f; // in seconds
 	float mMinLifespan = 5.0f;
 
-	float separationAmt = 0.f;
-	float cohesionAmt = 0.f;
-	float alignmentAmt = 0.f;
+	float cohesionAmt = 1.f;
+	float alignmentAmt = 5.f;
+
+	bool mIsFlocking = true;
 };

@@ -135,7 +135,7 @@ void initParticles() {
     linkTexture();
     glCheckError();
 
-    makeParticles();
+   // makeParticles();
 }
 
 void makeParticles() {
@@ -144,26 +144,27 @@ void makeParticles() {
     
     /*for testing flocking*/
     //float theta = (float)(rand()) / (float)(RAND_MAX)*M_PI;
-    float amt = (float)(rand() % 50 + 10.f);
-        
-    Vec3 particleVel = toVec3(cameraFront.normalized() * mParticleMaxVelocity);
-    int randomness = 20;
-    float adjustXVel = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
-    float adjustYVel = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
-    float adjustZVel = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
-    particleVel += Vec3(adjustXVel, adjustYVel, adjustZVel);
+    for (int i = 0; i < mNumParticleBurst; i++) {
+        float amt = (float)(rand() % 50 + 10.f);
 
-    randomness = 4;
-    //Randomness from -random to random
-    float adjustX = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
-    float adjustY = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
-    float adjustZ = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
+        Vec3 particleVel = toVec3(cameraFront.normalized() * mParticleMaxVelocity);
+        int randomness = 2;
+        float adjustXVel = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
+        float adjustYVel = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
+        float adjustZVel = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
+        particleVel += Vec3(adjustXVel, adjustYVel, adjustZVel);
 
-    Vec3 normalized = toVec3(cameraFront.normalized());
-    Vec3 spawnPoint = toVec3(cameraPos + normalized * particleCameraSpawnPoint + Vec3(normalized.x() * adjustX, normalized.y() * adjustY, normalized.z() * adjustZ));
-    auto myP = new Particle(spawnPoint, particleVel, mParticleRadius, Vec3(0.f, 0.f, 0.f));
-    mParticles.push_back(myP);
-    
+        randomness = 4;
+        //Randomness from -random to random
+        float adjustX = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
+        float adjustY = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
+        float adjustZ = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
+
+        Vec3 normalized = toVec3(cameraFront.normalized());
+        Vec3 spawnPoint = toVec3(cameraPos + normalized * particleCameraSpawnPoint + Vec3(normalized.x() * adjustX, normalized.y() * adjustY, normalized.z() * adjustZ));
+        auto myP = new Particle(spawnPoint, particleVel, mParticleRadius, Vec3(0.f, 0.f, 0.f));
+        mParticles.push_back(myP);
+    }
 }
 
 void initObstacles() {
@@ -376,50 +377,59 @@ void drawGroundPlane() {
 
 /*MOTION*/
 void updateParticles(float dt) {
+    for (auto it : mNewParticles) {
+        mParticles.push_back(it);
+    }
+    mNewParticles.clear();
+
     auto it = begin(mParticles);
     while (it != end(mParticles)) {
         // Do some stuff
         auto a = (Particle*)*it;
+        if (!a) continue;
         if (!a->getIsAlive()) {
             delete a;
             it = mParticles.erase(it);
         }
         else {
             //flock! only in first phase
-            Vec3 averagePos = a->getCurrentPos();
-            Vec3 averageVel = a->getCurrentVelocity();
-            Vec3 averageDiff = Vec3(0.f, 0.f, 0.f);
-            int neighborCount = 0;
-            auto cit = begin(mParticles);
-            while (cit != end(mParticles)) {
-                auto b = (Particle*)*cit;
-                if (cit != it &&
-                    toVec3(b->getCurrentPos() - a->getCurrentPos()).length() < mFlockRadius)
-                {
-                    //we are neighbors!
-                    auto diff = toVec3(b->getCurrentPos() - a->getCurrentPos());
-                    averageDiff += diff * (1 / diff.lengthSqr());
-                    averagePos += b->getCurrentPos();
-                    averageVel += b->getCurrentVelocity();
+            if (a->getIsFlocking()) {
+                Vec3 averagePos = a->getCurrentPos();
+                Vec3 averageVel = a->getCurrentVelocity();
+                int neighborCount = 0;
+                for (auto b : mParticles) {
+                    if (b != a &&
+                        toVec3(b->getCurrentPos() - a->getCurrentPos()).length() < mFlockRadius)
+                    {
+                        //we are neighbors!
 
-                    neighborCount++;
+                        //separation
+                        Vec3 diff = toVec3(toVec3(a->getCurrentPos() - b->getCurrentPos()).normalized());
+                        diff.setToLength(separationAmt / diff.lengthSqr());
+                        a->addForce(diff);
+                        //tally for attraction
+                        averagePos += b->getCurrentPos();
+                        //tally for alignment
+                        averageVel += b->getCurrentVelocity();
+
+                        neighborCount++;
+                    }
                 }
-                ++cit;
+                if (neighborCount > 0) {
+                    averagePos *= (1.f / neighborCount);
+                    averageVel *= (1.f / neighborCount);
+                    a->flock(averageVel, averagePos);
+                }
             }
-            if (neighborCount > 0) {
-                averageDiff *= (1.f / neighborCount);
-                averagePos *= (1.f / neighborCount);
-                averageVel *= (1.f / neighborCount);
-                a->flock(averageVel, averagePos, averageDiff);
-            }
-            
 
-            //a->addForce(mGravity); //only when sparkles not when flocking magic things
-            
             a->update(dt);
-            checkForParticleInteractions(a); //TODO: does this need to be before the moving?
+            if (!a->getIsFlocking()) {
+                checkForParticleInteractions(a); //TODO: does this need to be before the moving?
+                a->addForce(mGravity);
+            }
             checkForGroundInteraction(a);
             checkForObstacleInteraction(a);
+            checkForExplosion(a);
 
             ++it;
         }
@@ -437,13 +447,15 @@ bool compareDepth(Particle* p1, Particle* p2)
 void checkForParticleInteractions(Particle* p) {
     for (auto otherP : mParticles) {
         if (otherP != p) {
-            Vec3 dist = toVec3(p->getCurrentPos() - otherP->getCurrentPos());
-            float minDist = p->getRadius() + otherP->getRadius();
-            if (dist.length() < minDist) {
-                //collision!
-                float amtToMove = abs(dist.length() - minDist);
-                p->reflectOffOf(toVec3(dist.normalized()), amtToMove);
-                otherP->reflectOffOf(toVec3(dist.normalized() * -1.f), amtToMove);
+            if (otherP->getAge() > otherP->getFadeOn() && p->getAge() > p->getFadeOn()) {
+                Vec3 dist = toVec3(p->getCurrentPos() - otherP->getCurrentPos());
+                float minDist = p->getRadius() + otherP->getRadius();
+                if (dist.length() < minDist) {
+                    //collision!
+                    float amtToMove = abs(dist.length() - minDist);
+                    p->reflectOffOf(toVec3(dist.normalized()), amtToMove);
+                    otherP->reflectOffOf(toVec3(dist.normalized() * -1.f), amtToMove);
+                }
             }
         }
     }
@@ -507,6 +519,23 @@ void checkForObstacleInteraction(Particle* p) {
                     p->reflectOffOf(Vec3(0.f, 0.f, 1.f), amtToMove);
                 }
             }
+        }
+    }
+}
+
+void checkForExplosion(Particle* p) {
+    if (p->getIsFlocking() && toVec(p->getCurrentPos() - cameraPos).length() > mExplosionDistance) {
+        for (int i = 0; i < mNumParticlesToExplode; i++) {
+            float theta = (float)rand() / (float)RAND_MAX * 2 * M_PI;
+            float phi = (float)rand() / (float)RAND_MAX * M_PI;
+            
+            auto vel = Vec3(cos(theta) * sin(phi), cos(phi), sin(theta) * sin(phi));
+            vel.normalize();
+            vel *= mExplosionForce;
+
+            auto myP = new Particle(p->getCurrentPos(), vel, mParticleRadius / 2, Vec3(0.f, 0.f, 0.f));
+            myP->setIsFlocking(false);
+            mNewParticles.push_back(myP);
         }
     }
 }

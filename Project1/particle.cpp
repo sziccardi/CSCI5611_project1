@@ -2,7 +2,7 @@
 
 Particle::Particle() :
 	mPosition(Vec3(0.f, 0.f, 0.f)), mRadius(0.f), mColor(Vec3(0.f, 0.f, 0.f)), mCurrentForce(Vec3(0.f, 0.f, 0.f)),
-	mLifespan(0.f), mAge(0.f), mIsDying(false), mIsDead(false), mCurrentRot(Vec3(0.f, 0.f, 0.f))
+	mLifespan(0.f), mAge(0.f), mIsDying(false), mIsDead(false), mCurrentRot(Vec3(0.f, 0.f, 0.f)), mFadeOn(0.f)
 { }
 
 Particle::Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color) :
@@ -11,6 +11,7 @@ Particle::Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color) :
 { 
 	mLifespan = rand() % (int)(mMaxLifespan - mMinLifespan) + mMinLifespan;
 	mCurrentRot = Vec3(0.f, 1.f, 0.f);
+	mFadeOn = 3.f;
 }
 
 glm::mat4 Particle::draw(Vec3 cameraPos) {
@@ -63,7 +64,7 @@ void Particle::setVelocity(Vec3 newVel)
 
 void Particle::addForce(Vec3 force)
 {
-	mCurrentForce = force;
+	mCurrentForce += force;
 }
 
 void Particle::setLifespan(float lifespan)
@@ -133,11 +134,16 @@ void Particle::reflectOffOf(Vec3 normal, float amtToMove) {
 	mPosition += toVec(normal * amtToMove * 1.01f);
 }
 
-void Particle::flock(Vec3 averageNormalVel, Vec3 averagePos, Vec3 averageDiff) {
+void Particle::flock(Vec3 averageNormalVel, Vec3 averagePos) {
 	//cohesion
-	mCurrentForce += toVec3(toVec(averagePos - mPosition).normalized() * (cohesionAmt));
+	Vec3 cohesionForce = toVec3(averagePos - mPosition);
+	cohesionForce.normalize();
+	cohesionForce *= cohesionAmt;
+	addForce(cohesionForce);
 	//alignment
-	mCurrentForce += toVec3((averageNormalVel - mVelocity) * alignmentAmt);
-	//separation
-	mCurrentForce += averageDiff * separationAmt;
+	Vec3 alignmentForce = toVec3(averageNormalVel - mVelocity);
+	alignmentForce.normalize();
+	alignmentForce *= alignmentAmt;
+	addForce(alignmentForce);
+	//separation done outside
 }
