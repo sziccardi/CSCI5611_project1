@@ -137,37 +137,19 @@ void initParticles() {
 }
 
 void makeParticles() {
+
     if (mParticles.size() >= mMaxNumParticles) return;
-    //for (int i = 0; i < mMaxNumParticles; i++) {
-    //    float x = (float)(rand() % 120 - 66.f);
-    //    float y = (float)(rand() % 240 + 200.f);
-    //    float z = (float)(-1.0f * (rand() % 120));
-    //    //float x = 0.f;
-    //    //float y = 120.f;
-    //    //float z = -120.f;
-    //    Vec3 pos = Vec3(x, y, z);
-    //    float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    //    float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    //    float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-
-    //    Vec3 color = Vec3(r,g, b);
-    //    mParticles.push_back(new Particle(pos, Vec3(0.f, 0.f, 0.f), mParticleRadius, color));
-    //}
-
-    /*for testing particle collisions*/
-    //mParticles.push_back(new Particle(Vec3(-10, 600.f, 10.f), Vec3(0.f, -60.f, 0.f), mParticleRadius, Vec3(1.f, 0.f, 0.f)));
-    //mParticles.push_back(new Particle(Vec3(10.f, 600.f, 10.f), Vec3(0.f, -60.f, 0.f), mParticleRadius, Vec3(0.f, 0.f, 1.f)));
-
+    
     /*for testing flocking*/
-        float theta = (float)(rand()) / (float)(RAND_MAX)*M_PI;
-        float amt = (float)(rand() % 50 + 10.f);
-        float x = amt * cos(theta);
-        float adjust = (float)(rand() % 10 + 10.f);
-        float y = 0.f;
-        float z = -amt * sin(theta);
+    float theta = (float)(rand()) / (float)(RAND_MAX)*M_PI;
+    float amt = (float)(rand() % 50 + 10.f);
+    float x = amt * cos(theta);
+    float adjust = (float)(rand() % 10 + 10.f);
+    float y = 0.f;
+    float z = -amt * sin(theta);
 
-        auto myP = new Particle(toVec3(cameraPos + Vec3(adjust, -20.f, -adjust)), Vec3(x, y, z), mParticleRadius, Vec3(0.f, 0.f, 0.f));
-        mParticles.push_back(myP);
+    auto myP = new Particle(toVec3(cameraPos + Vec3(adjust, -20.f, -adjust)), Vec3(x, y, z), mParticleRadius, Vec3(0.f, 0.f, 0.f));
+    mParticles.push_back(myP);
     
 }
 
@@ -220,7 +202,7 @@ void initObstacles() {
     }
 }
 
-/*DRAWING*/
+//*DRAWING*/
 void drawObstacles() {
     glPushMatrix();
 
