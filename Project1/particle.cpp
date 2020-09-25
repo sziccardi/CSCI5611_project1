@@ -120,7 +120,8 @@ void Particle::reflectOffOf(Vec3 normal, float amtToMove) {
 	mPosition += toVec(normal * amtToMove * 1.01f);
 }
 
-void Particle::flock(vector<Particle> neighbors)
-{
-	//TODO: add cohesion/separation/etc. to the force vec3
+void Particle::flock(Vec3 averageNormalVel, Vec3 averagePos, Vec3 averageDiff) {
+	//cohesion
+	mCurrentForce += toVec3(toVec(averagePos - mPosition).normalized() * (cohesionAmt / averageDiff.length()));
+
 }

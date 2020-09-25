@@ -196,8 +196,10 @@ float mParticleRadius = 5.f;
 Vec3 mGravity = Vec3(0.f, -30.f, 0.f);
 unsigned int particleVBO, particleVAO;
 unsigned int particleTexture; //https://www.pinpng.com/search/sparkle/
+float mFlockRadius = 50.f;
 
 void initParticles();
+void makeParticles();
 void checkForParticleInteractions(Particle* p);
 void checkForGroundInteraction(Particle* p);
 void checkForObstacleInteraction(Particle* p);

@@ -35,7 +35,7 @@ public:
 
 	void update(float dt);
 	void reflectOffOf(Vec3 normal, float amtToMove);
-	void flock(vector<Particle> neighbors);
+	void flock(Vec3 averageNormalVel, Vec3 averagePos, Vec3 averageDiff);
 
 protected:
 	Vec3 mPosition;
@@ -53,4 +53,7 @@ protected:
 	float mMaxLifespan = 100.f; // in seconds
 	float mMinLifespan = 20.f;
 
+	float separationAmt = 1.f;
+	float cohesionAmt = 10.f;
+	float alignmentAmt = 10.f;
 };
