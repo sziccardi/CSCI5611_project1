@@ -54,6 +54,6 @@ protected:
 	float mMinLifespan = 20.f;
 
 	float separationAmt = 1.f;
-	float cohesionAmt = 10.f;
+	float cohesionAmt = 20.f;
 	float alignmentAmt = 10.f;
 };

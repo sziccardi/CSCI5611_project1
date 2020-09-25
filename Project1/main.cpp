@@ -143,12 +143,14 @@ void makeParticles() {
 
     /*for testing flocking*/
         float theta = (float)(rand()) / (float)(RAND_MAX)*M_PI;
-        float amt = (float)(rand() % 100 + 10.f);
+        float amt = (float)(rand() % 50 + 10.f);
         float x = amt * cos(theta);
-        float y = cameraPos.y();
+        float adjust = (float)(rand() % 10 + 10.f);
+        float y = 0.f;
         float z = -amt * sin(theta);
 
-        mParticles.push_back(new Particle(cameraPos, Vec3(x, y, z), mParticleRadius, Vec3(0.f, 0.f, 0.f)));
+        auto myP = new Particle(toVec3(cameraPos + Vec3(adjust, -20.f, -adjust)), Vec3(x, y, z), mParticleRadius, Vec3(0.f, 0.f, 0.f));
+        mParticles.push_back(myP);
     
 }
 
@@ -317,8 +319,8 @@ void updateParticles(float dt) {
         }
         else {
             //flock!
-            Vec3 averagePos = Vec3(0.f, 0.f, 0.f);
-            Vec3 averageVel = Vec3(0.f, 0.f, 0.f);
+            Vec3 averagePos = a->getCurrentPos();
+            Vec3 averageVel = a->getCurrentVelocity();
             Vec3 averageDiff = Vec3(0.f, 0.f, 0.f);
             int neighborCount = 0;
             auto cit = begin(mParticles);
@@ -336,10 +338,13 @@ void updateParticles(float dt) {
                 }
                 ++cit;
             }
-            averageDiff *= (1.f / neighborCount);
-            averagePos *= (1.f / neighborCount);
-            averageVel.normalize();
-            a->flock(averageVel, averagePos, averageDiff);
+            if (neighborCount > 0) {
+                averageDiff *= (1.f / neighborCount);
+                averagePos *= (1.f / neighborCount);
+                averageVel.normalize();
+                a->flock(averageVel, averagePos, averageDiff);
+            }
+            
 
             //a->addForce(mGravity); //only when sparkles not when flocking magic things
             
