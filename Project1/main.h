@@ -60,20 +60,14 @@ const char* vertexShaderSource = "#version 330 core\n"
 const char* fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
 "in vec2 TexCoord;\n"
-"uniform sampler2D texture;\n"
+"uniform sampler2D sampler;\n"
 "void main()\n"
 "{\n"
-"   vec4 texColor = texture(texture, TexCoord);\n"
+"   vec4 texColor = texture(sampler, TexCoord);\n"
 "   FragColor = texColor;\n"
 "}\n\0";
 
 /*Building related things*/
-float buildingTexCoords[] = {
-    0.0f, 0.0f,  // lower-left corner  
-    1.0f, 0.0f,  // lower-right corner
-    1.0, 1.0f,   // upper-right corner
-    0.0, 1.0f   // upper-left corner
-};
 float buildingVertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
          0.5f, -0.5f, -0.5f,  1.0f, 0.0f,

@@ -242,9 +242,19 @@ void drawObstacles() {
 void drawParticles() {
     glPushMatrix();
 
-    glBindVertexArray(particleVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    // texture coord attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    // bind textures on corresponding texture units
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, particleTexture);
+    // activate shader
+    glUseProgram(shaderProgram);
 
     // pass projection matrix to shader (note that in this case it could change every frame)
     glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)glutGet(GLUT_WINDOW_WIDTH) / (float)glutGet(GLUT_WINDOW_HEIGHT), 0.1f, cameraDepth);
@@ -258,8 +268,7 @@ void drawParticles() {
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
 
     // render boxes
-    glBindVertexArray(particleVAO);
-
+    glBindVertexArray(buildingVAO);
 
     for (auto it : mParticles) {
         auto model = it->draw();
@@ -495,7 +504,7 @@ void linkTexture() {
     glDeleteShader(vertex);
     glDeleteShader(fragment);
     glUseProgram(shaderProgram);
-    glUniform1i(glGetUniformLocation(shaderProgram, "texture"), 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "sampler"), 0);
 }
 
 void display() {

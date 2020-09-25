@@ -122,7 +122,7 @@ void Particle::reflectOffOf(Vec3 normal, float amtToMove) {
 
 void Particle::flock(Vec3 averageNormalVel, Vec3 averagePos, Vec3 averageDiff) {
 	//cohesion
-	auto dF = toVec3(toVec(averagePos - mPosition).normalized() * (cohesionAmt));
-	mCurrentForce += dF;
-	//cout << mCurrentForce.toString() << endl;
+	mCurrentForce += toVec3(toVec(averagePos - mPosition).normalized() * (cohesionAmt));
+	//alignment
+	mCurrentForce += toVec3((averageNormalVel - mVelocity) * alignmentAmt);
 }
