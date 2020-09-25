@@ -16,7 +16,7 @@ public:
 	Particle();
 	Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color);
 
-	glm::mat4 draw();
+	glm::mat4 draw(Vec3 cameraFront);
 	void moveTo(Vec3 newPos);
 	void shift(Vec3 deltaPos);
 	void setColor(Vec3 color);
@@ -36,6 +36,8 @@ public:
 	void update(float dt);
 	void reflectOffOf(Vec3 normal, float amtToMove);
 	void flock(Vec3 averageNormalVel, Vec3 averagePos, Vec3 averageDiff);
+	Vec3 getCurrentRot() { return mCurrentRot; }
+	void setCurrentRot(Vec3 newDir) { mCurrentRot = newDir; }
 
 protected:
 	Vec3 mPosition;
@@ -43,6 +45,7 @@ protected:
 	Vec3 mCurrentForce;
 	Vec3 mColor; // maybe turn this into a texture?
 	float mRadius;
+	Vec3 mCurrentRot;
 
 	float mLifespan;
 	float mAge;
@@ -50,10 +53,10 @@ protected:
 	bool mIsDying; // only need if we are going to impliment some sort of ease-out for dying
 	bool mIsDead;
 
-	float mMaxLifespan = 100.f; // in seconds
-	float mMinLifespan = 20.f;
+	float mMaxLifespan = 20.0f; // in seconds
+	float mMinLifespan = 5.0f;
 
-	float separationAmt = 15.f;
-	float cohesionAmt = 10.f;
-	float alignmentAmt = 5.f;
+	float separationAmt = 0.f;
+	float cohesionAmt = 0.f;
+	float alignmentAmt = 0.f;
 };

@@ -2,7 +2,7 @@
 
 Particle::Particle() :
 	mPosition(Vec3(0.f, 0.f, 0.f)), mRadius(0.f), mColor(Vec3(0.f, 0.f, 0.f)), mCurrentForce(Vec3(0.f, 0.f, 0.f)),
-	mLifespan(0.f), mAge(0.f), mIsDying(false), mIsDead(false)
+	mLifespan(0.f), mAge(0.f), mIsDying(false), mIsDead(false), mCurrentRot(Vec3(0.f, 0.f, 0.f))
 { }
 
 Particle::Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color) :
@@ -10,15 +10,28 @@ Particle::Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color) :
 	mAge(0.f), mIsDying(false), mIsDead(false)
 { 
 	mLifespan = rand() % (int)(mMaxLifespan - mMinLifespan) + mMinLifespan;
+	mCurrentRot = Vec3(0.f, 1.f, 0.f);
 }
 
-glm::mat4 Particle::draw() {	
+glm::mat4 Particle::draw(Vec3 cameraPos) {
 	// calculate the model matrix for each object and pass it to shader before drawing
 	glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+	
 	glm::vec3 newPos = glm::vec3(mPosition.x(), mPosition.y(), mPosition.z());
 	glm::vec3 newSize = glm::vec3(2 * mRadius);
+	//TODO: fix billboarding
+	Vec3 goalNorm = toVec3(toVec3(cameraPos - mPosition).normalized());
+	Vec3 oldCameraRot = mCurrentRot;
+	Vec3 cameraRotVec = toVec3(goalNorm.cross(oldCameraRot).normalized() * -1);
+	float dot = goalNorm.dot(oldCameraRot);
+	float cameraRotAmt = acos(dot); //normalized so lengths are 1
+
+	//model = glm::rotate(model, cameraRotAmt, glm::vec3(cameraRotVec.x(), cameraRotVec.y(), cameraRotVec.z()));
 	model = glm::translate(model, newPos);
-	model = glm::scale(model, newSize);
+	model = glm::scale(model, newSize); 
+	
+	mCurrentRot = goalNorm;
+	//cout << "acos( " << dot << " ) = " << cameraRotAmt << endl;
 	return model;
 }
 
