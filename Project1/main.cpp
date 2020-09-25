@@ -93,30 +93,8 @@ void initGroundPlane() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    // texture 2
-    // ---------
-    glGenTextures(1, &groundTexture);
-    glBindTexture(GL_TEXTURE_2D, groundTexture);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    unsigned char* data = stbi_load("groundTexture.png", &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
+    groundTexture = loadTexture("groundTexture.png");
+    linkTexture();
 }
 
 void initParticles() {
@@ -135,30 +113,8 @@ void initParticles() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    // texture 3
-    // ---------
-    glGenTextures(1, &particleTexture);
-    glBindTexture(GL_TEXTURE_2D, particleTexture);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    unsigned char* data = stbi_load("testTexture.png", &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
+    particleTexture = loadTexture("testTexture.png");
+    linkTexture();
 
     //for (int i = 0; i < mMaxNumParticles; i++) {
     //    float x = (float)(rand() % 120 - 66.f);
@@ -177,8 +133,8 @@ void initParticles() {
     //}
 
     /*for testing particle collisions*/
-    mParticles.push_back(new Particle(Vec3(0.f, 55.f, -55.f), Vec3(0.f, 0.f, 0.f), mParticleRadius, Vec3(1.f, 0.f, 0.f)));
-    mParticles.push_back(new Particle(Vec3(0.f, 105.f, 55.f), Vec3(0.f, 0.f, 0.f), mParticleRadius, Vec3(0.f, 0.f, 1.f)));
+    mParticles.push_back(new Particle(Vec3(10.f, 300.f, -10.f), Vec3(0.f, 0.f, 0.f), mParticleRadius, Vec3(1.f, 0.f, 0.f)));
+    mParticles.push_back(new Particle(Vec3(10.f, 300.f, 10.f), Vec3(0.f, 0.f, 0.f), mParticleRadius, Vec3(0.f, 0.f, 1.f)));
 
 }
 
@@ -198,52 +154,9 @@ void initObstacles() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    // texture 1
-    // ---------
-    glGenTextures(1, &buildingTexture);
-    glBindTexture(GL_TEXTURE_2D, buildingTexture);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // load image, create texture and generate mipmaps
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    unsigned char* data = stbi_load("buildingTexture.png", &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-
-    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    // -------------------------------------------------------------------------------------------
-    unsigned int vertex, fragment;
-    vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertex);
-    // fragment Shader
-    fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragment);
-
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertex);
-    glAttachShader(shaderProgram, fragment);
-    glLinkProgram(shaderProgram);
-
-    // delete the shaders as they're linked into our program now and no longer necessery
-    glDeleteShader(vertex);
-    glDeleteShader(fragment);
-    glUseProgram(shaderProgram);
-    glUniform1i(glGetUniformLocation(shaderProgram, "texture"), 0);
+    buildingTexture = loadTexture("buildingTexture.png");
+    linkTexture();
 
     float gridSpacing = buildingMin + buildingSize;
     float currBuildX = 0.f;
@@ -311,22 +224,11 @@ void drawObstacles() {
 }
 
 void drawParticles() {
-
     glPushMatrix();
 
-    glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // texture coord attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    // bind textures on corresponding texture units
+    glBindVertexArray(particleVAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, particleTexture);
-    // activate shader
-    glUseProgram(shaderProgram);
 
     // pass projection matrix to shader (note that in this case it could change every frame)
     glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)glutGet(GLUT_WINDOW_WIDTH) / (float)glutGet(GLUT_WINDOW_HEIGHT), 0.1f, cameraDepth);
@@ -336,7 +238,7 @@ void drawParticles() {
     glm::vec3 newCameraPos = glm::vec3(cameraPos.x(), cameraPos.y(), cameraPos.z());
     glm::vec3 newCameraFront = glm::vec3(cameraFront.x(), cameraFront.y(), cameraFront.z());
     glm::vec3 newCameraUp = glm::vec3(cameraUp.x(), cameraUp.y(), cameraUp.z());
-    glm::mat4 view = glm::mat4(1.0f); //glm::lookAt(newCameraPos, newCameraPos + newCameraFront, newCameraUp);
+    glm::mat4 view = glm::lookAt(newCameraPos, newCameraPos + newCameraFront, newCameraUp);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
 
     // render boxes
@@ -349,7 +251,6 @@ void drawParticles() {
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
-
     glPopMatrix();
 }
 
@@ -439,6 +340,67 @@ void checkForObstacleInteraction(Particle* p) {
 }
 
 /*RENDERING*/
+unsigned int loadTexture(char const* path)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, nrComponents;
+    unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT); // for this tutorial: use GL_CLAMP_TO_EDGE to prevent semi-transparent borders. Due to interpolation it takes texels from next repeat 
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data);
+    }
+
+    return textureID;
+}
+
+void linkTexture() {
+    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
+    // -------------------------------------------------------------------------------------------
+    unsigned int vertex, fragment;
+    vertex = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertex);
+    // fragment Shader
+    fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragment);
+
+    shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertex);
+    glAttachShader(shaderProgram, fragment);
+    glLinkProgram(shaderProgram);
+
+    // delete the shaders as they're linked into our program now and no longer necessery
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+    glUseProgram(shaderProgram);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texture"), 0);
+}
+
 void display() {
     //auto start = high_resolution_clock::now();
 
@@ -451,7 +413,7 @@ void display() {
     gluLookAt(cameraPos.x(), cameraPos.y(), cameraPos.z(), lookAt.x(), lookAt.y(), lookAt.z(), cameraUp.x(), cameraUp.y(), cameraUp.z());
 
     drawGroundPlane();
-    drawObstacles();
+    //drawObstacles();
     drawParticles();
     
 
@@ -470,8 +432,9 @@ void initGL() {
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); 
-
-    glEnable(GL_DEPTH_TEST);   
+    glEnable(GL_DEPTH_TEST); 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthFunc(GL_LESS);
     glShadeModel(GL_SMOOTH);   
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);

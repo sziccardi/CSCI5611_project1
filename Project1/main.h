@@ -23,6 +23,7 @@ using namespace std::chrono;
 /* References */
 //https://learnopengl.com/Getting-started/Camera
 //https://learnopengl.com/Getting-started/Textures
+//https://learnopengl.com/code_viewer_gh.php?code=src/4.advanced_opengl/3.2.blending_sort/blending_sorted.cpp
 
 unsigned char keyStates[256] = { 0 };
 
@@ -62,7 +63,8 @@ const char* fragmentShaderSource = "#version 330 core\n"
 "uniform sampler2D texture;\n"
 "void main()\n"
 "{\n"
-"   FragColor = texture(texture, TexCoord);\n"
+"   vec4 texColor = texture(texture, TexCoord);\n"
+"   FragColor = texColor;\n"
 "}\n\0";
 
 /*Building related things*/
@@ -129,10 +131,10 @@ void drawObstacles();
 /*Ground plane related things*/
 float groundVertices[] = {
          0.f,  0.f,  0.f,  0.0f, 0.0f,
-         1.f,  0.f,  0.f,  50.0f, 0.0f,
-         1.f,  0.f,  1.f,  50.0f, 50.0f,
-         1.f,  0.f,  1.f,  50.0f, 50.0f,
-         0.f,  0.f,  1.f,  0.0f, 50.0f,
+         1.f,  0.f,  0.f,  100.0f, 0.0f,
+         1.f,  0.f,  1.f,  100.0f, 100.0f,
+         1.f,  0.f,  1.f,  100.0f, 100.0f,
+         0.f,  0.f,  1.f,  0.0f, 100.0f,
          0.f,  0.f,  0.f,  0.0f, 0.0f
 };
 float mGroundPlanePos = -1.f;
@@ -145,16 +147,16 @@ void drawGroundPlane();
 
 /* Particle related things*/
 float particleVertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f
+         0.f,  0.f,  0.f,  0.0f, 0.0f,
+         1.f,  0.f,  0.f,  1.0f, 0.0f,
+         1.f,  0.f,  1.f,  1.0f, 1.0f,
+         1.f,  0.f,  1.f,  1.0f, 1.0f,
+         0.f,  0.f,  1.f,  0.0f, 1.0f,
+         0.f,  0.f,  0.f,  0.0f, 0.0f
 };
 std::vector<Particle*> mParticles;
 int mMaxNumParticles = 15;
-float mParticleRadius = 5.f;
+float mParticleRadius = 50.f;
 Vec3 mGravity = Vec3(0.f, -30.f, 0.f);
 unsigned int particleVBO, particleVAO;
 unsigned int particleTexture; //https://www.pinpng.com/search/sparkle/
@@ -174,6 +176,9 @@ void display();
 void initGL();
 //Handler for window re-size event.
 void reshape(GLsizei width, GLsizei height);
+//Texture handling
+unsigned int loadTexture(char const* path);
+void linkTexture();
 
 /* Input handlers */
 void keyPressed(unsigned char key, int x, int y);
