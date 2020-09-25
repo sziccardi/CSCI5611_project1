@@ -4,6 +4,8 @@
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "matrices.h"
 
@@ -14,7 +16,7 @@ public:
 	Particle();
 	Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color);
 
-	void draw();
+	glm::mat4 draw();
 	void moveTo(Vec3 newPos);
 	void shift(Vec3 deltaPos);
 	void setColor(Vec3 color);

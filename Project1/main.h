@@ -15,8 +15,8 @@
 #include "Obstacle.h"
 
 #define M_PI 3.14159265358979323846
-#define BUILDING_GRID_ROW 10
-#define BUILDING_GRID_COL 10
+#define BUILDING_GRID_ROW 5
+#define BUILDING_GRID_COL 5
 
 using namespace std::chrono;
 
@@ -26,7 +26,7 @@ using namespace std::chrono;
 
 unsigned char keyStates[256] = { 0 };
 
-Vec3 cameraPos = Vec3(0.0f, 72.0f, 0.0f);
+Vec3 cameraPos = Vec3(0.0f, 250.0f, 300.0f);
 Vec3 cameraFront = Vec3(0.f, -1.0f, -5.0f);
 Vec3 cameraUp = Vec3(0.0f, 1.0f, 0.0f);
 Vec2 mouseAngles = Vec2(0, 0);
@@ -34,6 +34,7 @@ Vec2 mouseAngles = Vec2(0, 0);
 float horizontal = 3.14f;
 float vertical = 0.0f;
 
+float cameraDepth = 10000.f;
 float cameraSpeed = 2.5f;
 float moveMult = 5.0f;
 float mouseSpeed = 0.0f;
@@ -41,6 +42,8 @@ float mouseSpeed = 0.0f;
 float previousFrame = 0.0f;
 float deltaTime = 0.01667f;
 
+
+int shaderProgram;
 const char* vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
 "layout (location = 1) in vec2 aTexCoord;\n"
@@ -114,27 +117,26 @@ float buildingVertices[] = {
 };
 Matrix buildings[BUILDING_GRID_ROW][BUILDING_GRID_COL] = {};
 std::vector<Obstacle*> mObstacles;
-float buildingMin = 5;
-int buildingSize = 10;
-int buildingHeightSize = 20;
+float buildingMin = 200;
+int buildingSize = 100;
+int buildingHeightSize = 200;
 unsigned int buildingVBO, buildingVAO;
 unsigned int buildingTexture;
-int buildingShaderProgram;
 
 void initObstacles();
 void drawObstacles();
 
 /*Ground plane related things*/
 float groundVertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  5.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  5.0f, 5.0f,
-         0.5f, -0.5f,  0.5f,  5.0f, 5.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 5.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f
+         0.f,  0.f,  0.f,  0.0f, 0.0f,
+         1.f,  0.f,  0.f,  50.0f, 0.0f,
+         1.f,  0.f,  1.f,  50.0f, 50.0f,
+         1.f,  0.f,  1.f,  50.0f, 50.0f,
+         0.f,  0.f,  1.f,  0.0f, 50.0f,
+         0.f,  0.f,  0.f,  0.0f, 0.0f
 };
 float mGroundPlanePos = -1.f;
-float mGroundPlaneSize = 500.f;
+float mGroundPlaneSize = 1000.f;
 unsigned int groundVBO, groundVAO;
 unsigned int groundTexture;
 
@@ -142,10 +144,20 @@ void initGroundPlane();
 void drawGroundPlane();
 
 /* Particle related things*/
+float particleVertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f
+};
 std::vector<Particle*> mParticles;
 int mMaxNumParticles = 15;
 float mParticleRadius = 5.f;
 Vec3 mGravity = Vec3(0.f, -30.f, 0.f);
+unsigned int particleVBO, particleVAO;
+unsigned int particleTexture; //https://www.pinpng.com/search/sparkle/
 
 void initParticles();
 void checkForParticleInteractions(Particle* p);

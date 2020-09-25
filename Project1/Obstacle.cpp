@@ -26,8 +26,8 @@ glm::mat4 Obstacle::draw(float scale)
     glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
     glm::vec3 newPos = glm::vec3(mPosition.x() / scale, mPosition.y()/ scale,  mPosition.z() / scale);
 	glm::vec3 newSize = glm::vec3(mSize.x(), mSize.y(), mSize.z());
+	model = glm::translate(model, newPos);
 	model = glm::scale(model, newSize);
-    model = glm::translate(model, newPos);
 	return model;
 }
 

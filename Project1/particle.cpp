@@ -12,14 +12,22 @@ Particle::Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color) :
 	mLifespan = rand() % (int)(mMaxLifespan - mMinLifespan) + mMinLifespan;
 }
 
-void Particle::draw()
+glm::mat4 Particle::draw()
 {	
-	glColor3f(mColor.x(), mColor.y(), mColor.z());
+	/*glColor3f(mColor.x(), mColor.y(), mColor.z());
 	glPushMatrix();
 	glTranslatef(mPosition.x(), mPosition.y(), mPosition.z());
 	glutSolidSphere(mRadius, 50, 50);
 	glPopMatrix();
-	glEnd();
+	glEnd();*/
+
+	// calculate the model matrix for each object and pass it to shader before drawing
+	glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+	glm::vec3 newPos = glm::vec3(mPosition.x(), mPosition.y(), mPosition.z());
+	glm::vec3 newSize = glm::vec3(mRadius*2, mRadius * 2, 1.0f);
+	model = glm::scale(model, newSize);
+	model = glm::translate(model, newPos);
+	return model;
 }
 
 void Particle::moveTo(Vec3 newPos)
