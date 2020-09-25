@@ -569,7 +569,7 @@ void linkTexture() {
     glCheckError();
     glUseProgram(shaderProgram);
     glCheckError();
-    glUniform1i(glGetUniformLocation(shaderProgram, "texture"), 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "sampler"), 0);
     glCheckError();
 }
 

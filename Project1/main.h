@@ -82,10 +82,10 @@ const char* vertexShaderSource = "#version 330 core\n"
 const char* fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
 "in vec2 TexCoord;\n"
-"uniform sampler2D texture;\n"
+"uniform sampler2D sampler;\n"
 "void main()\n"
 "{\n"
-"   vec4 texColor = texture(texture, TexCoord);\n"
+"   vec4 texColor = texture(sampler, TexCoord);\n"
 "   FragColor = texColor;\n"
 "}\n\0";
 
