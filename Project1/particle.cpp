@@ -16,7 +16,7 @@ glm::mat4 Particle::draw() {
 	// calculate the model matrix for each object and pass it to shader before drawing
 	glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
 	glm::vec3 newPos = glm::vec3(mPosition.x(), mPosition.y(), mPosition.z());
-	glm::vec3 newSize = glm::vec3(2.f, 100.f, 20.f);
+	glm::vec3 newSize = glm::vec3(2 * mRadius);
 	model = glm::translate(model, newPos);
 	model = glm::scale(model, newSize);
 	return model;

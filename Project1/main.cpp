@@ -133,8 +133,8 @@ void initParticles() {
     //}
 
     /*for testing particle collisions*/
-    mParticles.push_back(new Particle(Vec3(10.f, 300.f, -10.f), Vec3(0.f, 0.f, 0.f), mParticleRadius, Vec3(1.f, 0.f, 0.f)));
-    mParticles.push_back(new Particle(Vec3(10.f, 300.f, 10.f), Vec3(0.f, 0.f, 0.f), mParticleRadius, Vec3(0.f, 0.f, 1.f)));
+    //mParticles.push_back(new Particle(Vec3(-10, 600.f, 10.f), Vec3(0.f, -60.f, 0.f), mParticleRadius, Vec3(1.f, 0.f, 0.f)));
+    //mParticles.push_back(new Particle(Vec3(10.f, 600.f, 10.f), Vec3(0.f, -60.f, 0.f), mParticleRadius, Vec3(0.f, 0.f, 1.f)));
 
 }
 
@@ -169,7 +169,7 @@ void initObstacles() {
             float buildingHeight = buildingMin + rand() % buildingHeightSize;
 
             Vec3 pos = Vec3(currBuildX, 1.0f, currBuildZ);
-            Vec3 size = Vec3(buildingWidth / 2, buildingHeight, -buildingWidth);
+            Vec3 size = Vec3(buildingWidth / 2, buildingHeight, buildingWidth);
 
             Vec3 color = Vec3(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
             mObstacles.push_back(new Obstacle(pos, size, color, "buildingTexture.png"));
@@ -249,7 +249,7 @@ void drawParticles() {
         auto model = it->draw();
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
     }
     glPopMatrix();
 }
@@ -302,11 +302,11 @@ void updateParticles(float dt) {
             it = mParticles.erase(it);
         }
         else {
-            a->addForce(mGravity);
+            //a->addForce(mGravity); //only when sparkles not when flocking magic things
             a->update(dt);
             checkForParticleInteractions(a); //TODO: does this need to be before the moving?
             checkForGroundInteraction(a);
-            //checkForObstacleInteraction(a);
+            checkForObstacleInteraction(a);
             
             ++it;
         }
@@ -336,7 +336,58 @@ void checkForGroundInteraction(Particle* p) {
 }
 
 void checkForObstacleInteraction(Particle* p) {
-
+    for (auto obs : mObstacles) {
+        Vec3 diff = toVec3(p->getCurrentPos() - obs->getCurrentPos());
+        float yLim = p->getRadius() + obs->getCurrentSize().y() / 2;
+        float xLim = p->getRadius() + obs->getCurrentSize().x() / 2;
+        float zLim = p->getRadius() + obs->getCurrentSize().z() / 2;
+        if (abs(diff.x()) < abs(xLim) &&
+            abs(diff.y()) < abs(yLim) &&
+            abs(diff.z()) < abs(zLim))
+        {
+            //cout << "BOUNCE" << endl;
+            //collision!
+            if (abs(diff.x()) > abs(diff.y()) && abs(diff.x()) > abs(diff.z())) {
+                //hitting in the x direction
+                if (diff.x() < 0) {
+                    //from the left
+                    float amtToMove = abs((p->getCurrentPos().x() + p->getRadius()) - (obs->getCurrentPos().x() - obs->getCurrentSize().x() / 2) );
+                    p->reflectOffOf(Vec3(-1.f, 0.f, 0.f), amtToMove);
+                }
+                else {
+                    // from the right
+                    float amtToMove = abs((p->getCurrentPos().x() - p->getRadius()) - (obs->getCurrentPos().x() + obs->getCurrentSize().x() / 2));
+                    p->reflectOffOf(Vec3(-1.f, 0.f, 0.f), amtToMove);
+                }
+            }
+            else if (abs(diff.y()) > abs(diff.x()) && abs(diff.y()) > abs(diff.z())) {
+                //hitting in the y direction
+                if (diff.y() < 0) {
+                    //from the underside
+                    float amtToMove = abs((p->getCurrentPos().y() + p->getRadius()) - (obs->getCurrentPos().y() - obs->getCurrentSize().y() / 2));
+                    p->reflectOffOf(Vec3(0.f, -1.f, 0.f), amtToMove);
+                }
+                else {
+                    // from the top
+                    float amtToMove = abs((p->getCurrentPos().y() - p->getRadius()) - (obs->getCurrentPos().y() + obs->getCurrentSize().y() / 2));
+                    p->reflectOffOf(Vec3(0.f, 1.f, 0.f), amtToMove);
+                }
+            }
+            else if (abs(diff.z()) > abs(diff.x()) && abs(diff.z()) > abs(diff.y())) {
+                //hitting in the z direction
+                if (diff.z() < 0) {
+                    //from the back
+                    float amtToMove = abs((p->getCurrentPos().z() + p->getRadius()) - (obs->getCurrentPos().z() - obs->getCurrentSize().z() / 2));
+                    p->reflectOffOf(Vec3(0.f, 0.f, -1.f), amtToMove);
+                }
+                else {
+                    // from the frpnt
+                    float amtToMove = abs((p->getCurrentPos().z() - p->getRadius()) - (obs->getCurrentPos().z() + obs->getCurrentSize().z() / 2));
+                    p->reflectOffOf(Vec3(0.f, 0.f, 1.f), amtToMove);
+                }
+            }
+        }
+    }
 }
 
 /*RENDERING*/
@@ -413,7 +464,7 @@ void display() {
     gluLookAt(cameraPos.x(), cameraPos.y(), cameraPos.z(), lookAt.x(), lookAt.y(), lookAt.z(), cameraUp.x(), cameraUp.y(), cameraUp.z());
 
     drawGroundPlane();
-    //drawObstacles();
+    drawObstacles();
     drawParticles();
     
 

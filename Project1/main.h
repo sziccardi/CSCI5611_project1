@@ -15,8 +15,8 @@
 #include "Obstacle.h"
 
 #define M_PI 3.14159265358979323846
-#define BUILDING_GRID_ROW 5
-#define BUILDING_GRID_COL 5
+#define BUILDING_GRID_ROW 1
+#define BUILDING_GRID_COL 1
 
 using namespace std::chrono;
 
@@ -36,7 +36,7 @@ float horizontal = 3.14f;
 float vertical = 0.0f;
 
 float cameraDepth = 10000.f;
-float cameraSpeed = 2.5f;
+float cameraSpeed = 5.f;
 float moveMult = 5.0f;
 float mouseSpeed = 0.0f;
 
@@ -147,12 +147,48 @@ void drawGroundPlane();
 
 /* Particle related things*/
 float particleVertices[] = {
-         0.f,  0.f,  0.f,  0.0f, 0.0f,
-         1.f,  0.f,  0.f,  1.0f, 0.0f,
-         1.f,  0.f,  1.f,  1.0f, 1.0f,
-         1.f,  0.f,  1.f,  1.0f, 1.0f,
-         0.f,  0.f,  1.f,  0.0f, 1.0f,
-         0.f,  0.f,  0.f,  0.0f, 0.0f
+    // positions          // texture Coords
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
 std::vector<Particle*> mParticles;
 int mMaxNumParticles = 15;
