@@ -192,7 +192,7 @@ float particleVertices[] = {
 };
 std::vector<Particle*> mParticles;
 int mMaxNumParticles = 15;
-float mParticleRadius = 50.f;
+float mParticleRadius = 5.f;
 Vec3 mGravity = Vec3(0.f, -30.f, 0.f);
 unsigned int particleVBO, particleVAO;
 unsigned int particleTexture; //https://www.pinpng.com/search/sparkle/

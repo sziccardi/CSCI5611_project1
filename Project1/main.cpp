@@ -116,21 +116,21 @@ void initParticles() {
     particleTexture = loadTexture("testTexture.png");
     linkTexture();
 
-    //for (int i = 0; i < mMaxNumParticles; i++) {
-    //    float x = (float)(rand() % 120 - 66.f);
-    //    float y = (float)(rand() % 240 + 200.f);
-    //    float z = (float)(-1.0f * (rand() % 120));
-    //    //float x = 0.f;
-    //    //float y = 120.f;
-    //    //float z = -120.f;
-    //    Vec3 pos = Vec3(x, y, z);
-    //    float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    //    float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    //    float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    for (int i = 0; i < mMaxNumParticles; i++) {
+        float x = (float)(rand() % 120 - 66.f);
+        float y = (float)(rand() % 240 + 200.f);
+        float z = (float)(-1.0f * (rand() % 120));
+        //float x = 0.f;
+        //float y = 120.f;
+        //float z = -120.f;
+        Vec3 pos = Vec3(x, y, z);
+        float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        float g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        float b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 
-    //    Vec3 color = Vec3(r,g, b);
-    //    mParticles.push_back(new Particle(pos, Vec3(0.f, 0.f, 0.f), mParticleRadius, color));
-    //}
+        Vec3 color = Vec3(r,g, b);
+        mParticles.push_back(new Particle(pos, Vec3(0.f, 0.f, 0.f), mParticleRadius, color));
+    }
 
     /*for testing particle collisions*/
     //mParticles.push_back(new Particle(Vec3(-10, 600.f, 10.f), Vec3(0.f, -60.f, 0.f), mParticleRadius, Vec3(1.f, 0.f, 0.f)));
@@ -164,7 +164,7 @@ void initObstacles() {
 
     for (int r = 0; r < BUILDING_GRID_ROW; r++) {
         for (int c = 0; c < BUILDING_GRID_COL; c++) {
-               
+
             float buildingWidth = buildingMin + rand() % buildingSize;
             float buildingHeight = buildingMin + rand() % buildingHeightSize;
 
@@ -184,7 +184,7 @@ void initObstacles() {
 /*DRAWING*/
 void drawObstacles() {
     glPushMatrix();
-    
+
     glBindBuffer(GL_ARRAY_BUFFER, buildingVBO);
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
@@ -302,12 +302,12 @@ void updateParticles(float dt) {
             it = mParticles.erase(it);
         }
         else {
-            //a->addForce(mGravity); //only when sparkles not when flocking magic things
+            a->addForce(mGravity); //only when sparkles not when flocking magic things
             a->update(dt);
             checkForParticleInteractions(a); //TODO: does this need to be before the moving?
             checkForGroundInteraction(a);
             checkForObstacleInteraction(a);
-            
+
             ++it;
         }
     }
@@ -351,7 +351,7 @@ void checkForObstacleInteraction(Particle* p) {
                 //hitting in the x direction
                 if (diff.x() < 0) {
                     //from the left
-                    float amtToMove = abs((p->getCurrentPos().x() + p->getRadius()) - (obs->getCurrentPos().x() - obs->getCurrentSize().x() / 2) );
+                    float amtToMove = abs((p->getCurrentPos().x() + p->getRadius()) - (obs->getCurrentPos().x() - obs->getCurrentSize().x() / 2));
                     p->reflectOffOf(Vec3(-1.f, 0.f, 0.f), amtToMove);
                 }
                 else {
@@ -466,7 +466,7 @@ void display() {
     drawGroundPlane();
     drawObstacles();
     drawParticles();
-    
+
 
     glutSwapBuffers();
     //auto stop = high_resolution_clock::now();
@@ -482,17 +482,17 @@ void initGL() {
     glutCreateWindow("Project 1");
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); 
-    glEnable(GL_DEPTH_TEST); 
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthFunc(GL_LESS);
-    glShadeModel(GL_SMOOTH);   
+    glShadeModel(GL_SMOOTH);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 }
 
-void reshape(GLsizei width, GLsizei height) { 
-   // Compute aspect ratio of the new window
+void reshape(GLsizei width, GLsizei height) {
+    // Compute aspect ratio of the new window
     if (height == 0) height = 1;                // To prevent divide by 0
     GLfloat aspect = (GLfloat)width / (GLfloat)height;
 
@@ -516,12 +516,12 @@ void animLoop(int val) {
 }
 
 int main(int argc, char** argv) {
-	glutInit(&argc, argv);
+    glutInit(&argc, argv);
 
-	/*display stuff*/
-	initGL();
+    /*display stuff*/
+    initGL();
     glewInit();
-    
+
     /*particle stuff*/
     initParticles();
     initObstacles();
@@ -536,10 +536,10 @@ int main(int argc, char** argv) {
     glutMouseFunc(mouse);
 
     glutTimerFunc(1, animLoop, 1);
-	glutMainLoop();
+    glutMainLoop();
 
     //glDeleteVertexArrays(1, &VAO);
     //glDeleteBuffers(1, &VBO);
     //glDeleteProgram(shaderProgram);
-	return 0;
+    return 0;
 }
