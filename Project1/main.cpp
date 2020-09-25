@@ -58,7 +58,7 @@ void keyOperations(void) {
     cameraFront.normalize();// maybe not necessary
 
     if (keyStates[' ']) {
-        cameraPos += toVec3(cameraFront * dCam * 15.f);
+        cameraPos += toVec3(cameraFront * dCam * 100.f);
     }
 
     //cout << cameraPos.toString() << endl;
@@ -72,6 +72,8 @@ void mouse(int button, int state, int x, int y) {
         printf("Scroll %s At %d %d\n", (button == 3) ? "Up" : "Down", x, y);
     }
     else {  // normal button event
+        // Mouse click, spawn particles
+        makeParticles();
         printf("Button %s At %d %d\n", (state == GLUT_DOWN) ? "Down" : "Up", x, y);
     }
 }
@@ -159,14 +161,26 @@ void makeParticles() {
     //mParticles.push_back(new Particle(Vec3(10.f, 600.f, 10.f), Vec3(0.f, -60.f, 0.f), mParticleRadius, Vec3(0.f, 0.f, 1.f)));
 
     /*for testing flocking*/
-        float theta = (float)(rand()) / (float)(RAND_MAX)*M_PI;
+        //float theta = (float)(rand()) / (float)(RAND_MAX)*M_PI;
         float amt = (float)(rand() % 50 + 10.f);
-        float x = amt * cos(theta);
-        float adjust = (float)(rand() % 10 + 10.f);
-        float y = 0.f;
-        float z = -amt * sin(theta);
+        
 
-        auto myP = new Particle(toVec3(cameraPos + Vec3(adjust, -20.f, -adjust)), Vec3(x, y, z), mParticleRadius, Vec3(0.f, 0.f, 0.f));
+        Vec3 particleVel = toVec3(cameraFront.normalized() * 200);
+        int randomness = 10;
+        float adjustXVel = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
+        float adjustYVel = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
+        float adjustZVel = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
+        particleVel += Vec3(adjustXVel, adjustYVel, adjustZVel);
+
+        randomness = 4;
+        //Randomness from -random to random
+        float adjustX = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
+        float adjustY = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
+        float adjustZ = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
+
+        Vec3 normalized = toVec3(cameraFront.normalized());
+        Vec3 spawnPoint = toVec3(cameraPos + normalized * particleCameraSpawnPoint + Vec3(normalized.x() * adjustX, normalized.y() * adjustY, normalized.z() * adjustZ));
+        auto myP = new Particle(spawnPoint, particleVel, mParticleRadius, Vec3(0.f, 0.f, 0.f));
         mParticles.push_back(myP);
     
 }
@@ -197,25 +211,26 @@ void initObstacles() {
     glCheckError();
     linkTexture();
     glCheckError();
-    float gridSpacing = buildingMin + buildingSize;
-    float currBuildX = 0.f;
-    float currBuildZ = 0.f;
+    float gridSpacing = buildingMin + buildingSize + buildingAdjustment;
+    float currBuildX = 100.f;
+    float currBuildZ = 100.f;
 
     for (int r = 0; r < BUILDING_GRID_ROW; r++) {
         for (int c = 0; c < BUILDING_GRID_COL; c++) {
 
             float buildingWidth = buildingMin + rand() % buildingSize;
-            float buildingHeight = buildingMin + rand() % buildingHeightSize;
+            float buildingWidth2 = buildingMin + rand() % buildingSize;
+            float buildingHeight = buildingMin + 150 + rand() % buildingHeightSize;
 
             Vec3 pos = Vec3(currBuildX, 1.0f, currBuildZ);
-            Vec3 size = Vec3(buildingWidth / 2, buildingHeight, buildingWidth);
+            Vec3 size = Vec3(buildingWidth, buildingHeight, buildingWidth2);
 
             Vec3 color = Vec3(static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX), static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
             mObstacles.push_back(new Obstacle(pos, size, color, "buildingTexture.png"));
 
             currBuildX += gridSpacing;
         }
-        currBuildX = 0.f;
+        currBuildX = 100.f;
         currBuildZ += gridSpacing;
     }
 }
@@ -316,6 +331,12 @@ void drawParticles() {
 
     for (auto it : mParticles) {
         auto model = it->draw();
+        
+       // Vec3 cameraRot = toVec3(toVec3(cameraFront - cameraPos).normalized());
+       // glm::vec3 rot = glm::polar(glm::vec3(cameraRot.x(), cameraRot.y(), cameraRot.z()));
+      //  glm::rotateY(model, rot.y);
+      //  float xRot = cameraRot
+
         //TODO: adjust the model to face the camera
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
         glCheckError();
@@ -426,7 +447,7 @@ void updateParticles(float dt) {
             ++it;
         }
     }
-    makeParticles(); //if necessary
+    //makeParticles(); //if necessary
 
     sort(mParticles.begin(), mParticles.end(), compareDepth);
 }

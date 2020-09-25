@@ -50,10 +50,10 @@ protected:
 	bool mIsDying; // only need if we are going to impliment some sort of ease-out for dying
 	bool mIsDead;
 
-	float mMaxLifespan = 100.f; // in seconds
-	float mMinLifespan = 20.f;
+	float mMaxLifespan = 20.0f; // in seconds
+	float mMinLifespan = 5.0f;
 
-	float separationAmt = 15.f;
+	float separationAmt = 20.f;
 	float cohesionAmt = 10.f;
 	float alignmentAmt = 5.f;
 };

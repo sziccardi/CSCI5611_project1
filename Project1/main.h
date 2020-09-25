@@ -1,13 +1,15 @@
 #pragma once
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-
+#define GLM_ENABLE_EXPERIMENTAL
 #include <cmath>
 #include <chrono> 
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp> //translate, rotate, scale, perspective 
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/polar_coordinates.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 #include "stb_image.h"
 #include <algorithm>
 
@@ -38,8 +40,8 @@ GLenum glCheckError_(const char* file, int line)
 #define glCheckError() glCheckError_(__FILE__, __LINE__) 
 
 #define M_PI 3.14159265358979323846
-#define BUILDING_GRID_ROW 1
-#define BUILDING_GRID_COL 1
+#define BUILDING_GRID_ROW 10
+#define BUILDING_GRID_COL 10
 
 using namespace std::chrono;
 
@@ -65,6 +67,9 @@ float mouseSpeed = 0.0f;
 
 float previousFrame = 0.0f;
 float deltaTime = 0.01667f;
+
+
+float particleCameraSpawnPoint = 30.0;
 
 
 int shaderProgram;
@@ -136,9 +141,10 @@ float buildingVertices[] = {
 };
 Matrix buildings[BUILDING_GRID_ROW][BUILDING_GRID_COL] = {};
 std::vector<Obstacle*> mObstacles;
-float buildingMin = 200;
-int buildingSize = 100;
-int buildingHeightSize = 200;
+float buildingMin = 55;
+int buildingSize = 70;
+int buildingAdjustment = 75;
+int buildingHeightSize = 300;
 unsigned int buildingVBO, buildingVAO;
 unsigned int buildingTexture;
 
