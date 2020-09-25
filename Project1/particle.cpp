@@ -27,7 +27,7 @@ glm::mat4 Particle::draw(Vec3 cameraPos) {
 	float dot = goalNorm.dot(oldCameraRot);
 	float cameraRotAmt = acos(dot); //normalized so lengths are 1
 
-	//model = glm::rotate(model, cameraRotAmt, glm::vec3(cameraRotVec.x(), cameraRotVec.y(), cameraRotVec.z()));
+	model = glm::rotate(model, cameraRotAmt, glm::vec3(cameraRotVec.x(), cameraRotVec.y(), cameraRotVec.z()));
 	model = glm::translate(model, newPos);
 	model = glm::scale(model, newSize); 
 	

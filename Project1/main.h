@@ -179,10 +179,10 @@ float particleVertices[] = {
 };
 std::vector<Particle*> mParticles;
 std::vector<Particle*> mNewParticles;
-int mMaxNumParticles = 65;
+int mMaxNumParticles = 365;
 int mNumParticleBurst = 5;
 float mParticleRadius = 2.f;
-Vec3 mGravity = Vec3(0.f, -30.f, 0.f);
+Vec3 mGravity = Vec3(0.f, -50.f, 0.f);
 unsigned int particleVBO, particleVAO;
 unsigned int particleTexture; //https://www.pinpng.com/search/sparkle/
 float mFlockRadius = 50.f;
@@ -217,6 +217,6 @@ void keyUp(unsigned char key, int x, int y);
 void keyOperations(void);
 
 /* Animation */
-float mExplosionForce = 60.f;
-float mExplosionDistance = 100.f;
+float mExplosionForce = 100.f;
+float mExplosionDistance = 300.f;
 int mNumParticlesToExplode = 10.f;

@@ -130,7 +130,7 @@ void initParticles() {
     glEnableVertexAttribArray(1);
     glCheckError();
     // load image, create texture and generate mipmaps
-    particleTexture = loadTexture("sparkle.png");
+    particleTexture = loadTexture("testTexture.png");
     glCheckError();
     linkTexture();
     glCheckError();
