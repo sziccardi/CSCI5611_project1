@@ -79,19 +79,28 @@ void mouse(int button, int state, int x, int y) {
 /*INIT  OBJECTS*/
 void initGroundPlane() {
     glGenVertexArrays(1, &groundVAO);
+    glCheckError();
     glGenBuffers(1, &groundVBO);
+    glCheckError();
 
     glBindVertexArray(groundVAO);
+    glCheckError();
 
     glBindBuffer(GL_ARRAY_BUFFER, groundVBO);
+    glCheckError();
     glBufferData(GL_ARRAY_BUFFER, sizeof(groundVertices), groundVertices, GL_STATIC_DRAW);
+    glCheckError();
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glCheckError();
     glEnableVertexAttribArray(0);
+    glCheckError();
     // texture coord attribute
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glCheckError();
     glEnableVertexAttribArray(1);
+    glCheckError();
 
     groundTexture = loadTexture("groundTexture.png");
     linkTexture();
@@ -99,19 +108,28 @@ void initGroundPlane() {
 
 void initParticles() {
     glGenVertexArrays(1, &particleVAO);
+    glCheckError();
     glGenBuffers(1, &particleVBO);
+    glCheckError();
 
     glBindVertexArray(particleVAO);
+    glCheckError();
 
     glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
+    glCheckError();
     glBufferData(GL_ARRAY_BUFFER, sizeof(particleVertices), particleVertices, GL_STATIC_DRAW);
+    glCheckError();
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glCheckError();
     glEnableVertexAttribArray(0);
+    glCheckError();
     // texture coord attribute
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glCheckError();
     glEnableVertexAttribArray(1);
+    glCheckError();
 
     particleTexture = loadTexture("testTexture.png");
     linkTexture();
@@ -154,24 +172,30 @@ void makeParticles() {
 
 void initObstacles() {
     glGenVertexArrays(1, &buildingVAO);
+    glCheckError();
     glGenBuffers(1, &buildingVBO);
-
+    glCheckError();
     glBindVertexArray(buildingVAO);
-
+    glCheckError();
     glBindBuffer(GL_ARRAY_BUFFER, buildingVBO);
+    glCheckError();
     glBufferData(GL_ARRAY_BUFFER, sizeof(buildingVertices), buildingVertices, GL_STATIC_DRAW);
-
+    glCheckError();
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glCheckError();
     glEnableVertexAttribArray(0);
+    glCheckError();
     // texture coord attribute
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glCheckError();
     glEnableVertexAttribArray(1);
-
+    glCheckError();
     // load image, create texture and generate mipmaps
     buildingTexture = loadTexture("buildingTexture.png");
+    glCheckError();
     linkTexture();
-
+    glCheckError();
     float gridSpacing = buildingMin + buildingSize;
     float currBuildX = 0.f;
     float currBuildZ = 0.f;
@@ -200,22 +224,31 @@ void drawObstacles() {
     glPushMatrix();
 
     glBindBuffer(GL_ARRAY_BUFFER, buildingVBO);
+    glCheckError();
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glCheckError();
     glEnableVertexAttribArray(0);
+    glCheckError();
     // texture coord attribute
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glCheckError();
     glEnableVertexAttribArray(1);
+    glCheckError();
 
     // bind textures on corresponding texture units
     glActiveTexture(GL_TEXTURE0);
+    glCheckError();
     glBindTexture(GL_TEXTURE_2D, buildingTexture);
+    glCheckError();
     // activate shader
     glUseProgram(shaderProgram);
+    glCheckError();
 
     // pass projection matrix to shader (note that in this case it could change every frame)
     glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)glutGet(GLUT_WINDOW_WIDTH) / (float)glutGet(GLUT_WINDOW_HEIGHT), 0.1f, cameraDepth);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
+    glCheckError();
 
     // camera/view transformation
     glm::vec3 newCameraPos = glm::vec3(cameraPos.x(), cameraPos.y(), cameraPos.z());
@@ -223,16 +256,20 @@ void drawObstacles() {
     glm::vec3 newCameraUp = glm::vec3(cameraUp.x(), cameraUp.y(), cameraUp.z());
     glm::mat4 view = glm::lookAt(newCameraPos, newCameraPos + newCameraFront, newCameraUp);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+    glCheckError();
 
     // render boxes
     glBindVertexArray(buildingVAO);
+    glCheckError();
 
 
     for (auto it : mObstacles) {
         auto model = it->draw(1);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+        glCheckError();
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        glCheckError();
     }
     glPopMatrix();
 }
@@ -241,12 +278,16 @@ void drawParticles() {
     glPushMatrix();
 
     glBindVertexArray(particleVAO);
+    glCheckError();
     glActiveTexture(GL_TEXTURE0);
+    glCheckError();
     glBindTexture(GL_TEXTURE_2D, particleTexture);
+    glCheckError();
 
     // pass projection matrix to shader (note that in this case it could change every frame)
     glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)glutGet(GLUT_WINDOW_WIDTH) / (float)glutGet(GLUT_WINDOW_HEIGHT), 0.1f, cameraDepth);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
+    glCheckError();
 
     // camera/view transformation
     glm::vec3 newCameraPos = glm::vec3(cameraPos.x(), cameraPos.y(), cameraPos.z());
@@ -254,16 +295,20 @@ void drawParticles() {
     glm::vec3 newCameraUp = glm::vec3(cameraUp.x(), cameraUp.y(), cameraUp.z());
     glm::mat4 view = glm::lookAt(newCameraPos, newCameraPos + newCameraFront, newCameraUp);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+    glCheckError();
 
     // render boxes
     glBindVertexArray(particleVAO);
+    glCheckError();
 
 
     for (auto it : mParticles) {
         auto model = it->draw();
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+        glCheckError();
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        glCheckError();
     }
     glPopMatrix();
 }
@@ -271,21 +316,30 @@ void drawParticles() {
 void drawGroundPlane() {
     glPushMatrix();
     glBindBuffer(GL_ARRAY_BUFFER, groundVBO);
+    glCheckError();
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glCheckError();
     glEnableVertexAttribArray(0);
+    glCheckError();
     // texture coord attribute
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glCheckError();
     glEnableVertexAttribArray(1);
+    glCheckError();
     // bind textures on corresponding texture units
     glActiveTexture(GL_TEXTURE0);
+    glCheckError();
     glBindTexture(GL_TEXTURE_2D, groundTexture);
+    glCheckError();
     // activate shader
     glUseProgram(shaderProgram);
+    glCheckError();
 
     // pass projection matrix to shader (note that in this case it could change every frame)
     glm::mat4 projection = glm::perspective(glm::radians(45.f), (float)glutGet(GLUT_WINDOW_WIDTH) / (float)glutGet(GLUT_WINDOW_HEIGHT), 0.1f, cameraDepth);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
+    glCheckError();
 
     // camera/view transformation
     glm::vec3 newCameraPos = glm::vec3(cameraPos.x(), cameraPos.y(), cameraPos.z());
@@ -293,16 +347,20 @@ void drawGroundPlane() {
     glm::vec3 newCameraUp = glm::vec3(cameraUp.x(), cameraUp.y(), cameraUp.z());
     glm::mat4 view = glm::lookAt(newCameraPos, newCameraPos + newCameraFront, newCameraUp);
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+    glCheckError();
 
     // render boxes
     glBindVertexArray(buildingVAO);
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::scale(model, glm::vec3(mGroundPlaneSize * 2, 1.f, mGroundPlaneSize * 2));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+    glCheckError();
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    glCheckError();
 
     glPopMatrix();
+    glCheckError();
 }
 
 /*MOTION*/
@@ -436,6 +494,7 @@ unsigned int loadTexture(char const* path)
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
+    glCheckError();
 
     int width, height, nrComponents;
     unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
@@ -450,13 +509,20 @@ unsigned int loadTexture(char const* path)
             format = GL_RGBA;
 
         glBindTexture(GL_TEXTURE_2D, textureID);
+        glCheckError();
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glCheckError();
         glGenerateMipmap(GL_TEXTURE_2D);
+        glCheckError();
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT); // for this tutorial: use GL_CLAMP_TO_EDGE to prevent semi-transparent borders. Due to interpolation it takes texels from next repeat 
+        glCheckError();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        glCheckError();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glCheckError();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glCheckError();
 
         stbi_image_free(data);
     }
@@ -474,23 +540,37 @@ void linkTexture() {
     // -------------------------------------------------------------------------------------------
     unsigned int vertex, fragment;
     vertex = glCreateShader(GL_VERTEX_SHADER);
+    glCheckError();
     glShaderSource(vertex, 1, &vertexShaderSource, NULL);
+    glCheckError();
     glCompileShader(vertex);
+    glCheckError();
     // fragment Shader
     fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    glCheckError();
     glShaderSource(fragment, 1, &fragmentShaderSource, NULL);
+    glCheckError();
     glCompileShader(fragment);
+    glCheckError();
 
     shaderProgram = glCreateProgram();
+    glCheckError();
     glAttachShader(shaderProgram, vertex);
+    glCheckError();
     glAttachShader(shaderProgram, fragment);
+    glCheckError();
     glLinkProgram(shaderProgram);
+    glCheckError();
 
     // delete the shaders as they're linked into our program now and no longer necessery
     glDeleteShader(vertex);
+    glCheckError();
     glDeleteShader(fragment);
+    glCheckError();
     glUseProgram(shaderProgram);
+    glCheckError();
     glUniform1i(glGetUniformLocation(shaderProgram, "texture"), 0);
+    glCheckError();
 }
 
 void display() {
@@ -530,6 +610,8 @@ void initGL() {
     glDepthFunc(GL_LESS);
     glShadeModel(GL_SMOOTH);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+    glCheckError();
 }
 
 void reshape(GLsizei width, GLsizei height) {
@@ -542,9 +624,13 @@ void reshape(GLsizei width, GLsizei height) {
 
     // Set the aspect ratio of the clipping volume to match the viewport
     glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
+
+    glCheckError();
     glLoadIdentity();             // Reset
+    glCheckError();
     // Enable perspective projection with fovy, aspect, zNear and zFar
     gluPerspective(45.0f, aspect, 0.1f, cameraDepth);
+    glCheckError();
 }
 
 void animLoop(int val) {
@@ -577,6 +663,7 @@ int main(int argc, char** argv) {
     glutMouseFunc(mouse);
 
     glutTimerFunc(1, animLoop, 1);
+    glCheckError();
     glutMainLoop();
 
     //glDeleteVertexArrays(1, &VAO);
