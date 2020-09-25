@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp> //translate, rotate, scale, perspective 
 #include <glm/gtc/type_ptr.hpp>
 #include "stb_image.h"
+#include <algorithm>
 
 #include "matrices.h"
 #include "particle.h"
@@ -147,10 +148,10 @@ void drawObstacles();
 /*Ground plane related things*/
 float groundVertices[] = {
          0.f,  0.f,  0.f,  0.0f, 0.0f,
-         1.f,  0.f,  0.f,  100.0f, 0.0f,
-         1.f,  0.f,  1.f,  100.0f, 100.0f,
-         1.f,  0.f,  1.f,  100.0f, 100.0f,
-         0.f,  0.f,  1.f,  0.0f, 100.0f,
+         1.f,  0.f,  0.f,  10.0f, 0.0f,
+         1.f,  0.f,  1.f,  10.0f, 10.0f,
+         1.f,  0.f,  1.f,  10.0f, 10.0f,
+         0.f,  0.f,  1.f,  0.0f, 10.0f,
          0.f,  0.f,  0.f,  0.0f, 0.0f
 };
 float mGroundPlanePos = -1.f;
@@ -163,48 +164,12 @@ void drawGroundPlane();
 
 /* Particle related things*/
 float particleVertices[] = {
-    // positions          // texture Coords
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+         0.f,  0.f,  0.f,  0.0f, 0.0f,
+         1.f,  0.f,  0.f,  1.0f, 0.0f,
+         1.f,  0.f,  1.f,  1.0f, 1.0f,
+         1.f,  0.f,  1.f,  1.0f, 1.0f,
+         0.f,  0.f,  1.f,  0.0f, 1.0f,
+         0.f,  0.f,  0.f,  0.0f, 0.0f
 };
 std::vector<Particle*> mParticles;
 int mMaxNumParticles = 35;
@@ -220,6 +185,7 @@ void checkForParticleInteractions(Particle* p);
 void checkForGroundInteraction(Particle* p);
 void checkForObstacleInteraction(Particle* p);
 void updateParticles(float dt);
+bool compareDepth(Particle* p1, Particle* p2);
 void drawParticles();
 
 /* Display loop */

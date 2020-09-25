@@ -111,15 +111,12 @@ void initParticles() {
     glCheckError();
     glGenBuffers(1, &particleVBO);
     glCheckError();
-
     glBindVertexArray(particleVAO);
     glCheckError();
-
     glBindBuffer(GL_ARRAY_BUFFER, particleVBO);
     glCheckError();
     glBufferData(GL_ARRAY_BUFFER, sizeof(particleVertices), particleVertices, GL_STATIC_DRAW);
     glCheckError();
-
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glCheckError();
@@ -130,9 +127,11 @@ void initParticles() {
     glCheckError();
     glEnableVertexAttribArray(1);
     glCheckError();
-
-    particleTexture = loadTexture("testTexture.png");
+    // load image, create texture and generate mipmaps
+    particleTexture = loadTexture("sparkle.png");
+    glCheckError();
     linkTexture();
+    glCheckError();
 
     makeParticles();
 }
@@ -317,10 +316,11 @@ void drawParticles() {
 
     for (auto it : mParticles) {
         auto model = it->draw();
+        //TODO: adjust the model to face the camera
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
         glCheckError();
 
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
         glCheckError();
     }
     glPopMatrix();
@@ -399,7 +399,8 @@ void updateParticles(float dt) {
                     toVec3(b->getCurrentPos() - a->getCurrentPos()).length() < mFlockRadius)
                 {
                     //we are neighbors!
-                    averageDiff += toVec3(b->getCurrentPos() - a->getCurrentPos());
+                    auto diff = toVec3(b->getCurrentPos() - a->getCurrentPos());
+                    averageDiff += diff * (1 / diff.lengthSqr());
                     averagePos += b->getCurrentPos();
                     averageVel += b->getCurrentVelocity();
 
@@ -426,6 +427,13 @@ void updateParticles(float dt) {
         }
     }
     makeParticles(); //if necessary
+
+    sort(mParticles.begin(), mParticles.end(), compareDepth);
+}
+// Compares two intervals according to staring times. 
+bool compareDepth(Particle* p1, Particle* p2)
+{
+    return (toVec3(cameraPos - p1->getCurrentPos()).length() > toVec3(cameraPos - p2->getCurrentPos()).length());
 }
 
 void checkForParticleInteractions(Particle* p) {

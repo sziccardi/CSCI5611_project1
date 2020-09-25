@@ -125,4 +125,6 @@ void Particle::flock(Vec3 averageNormalVel, Vec3 averagePos, Vec3 averageDiff) {
 	mCurrentForce += toVec3(toVec(averagePos - mPosition).normalized() * (cohesionAmt));
 	//alignment
 	mCurrentForce += toVec3((averageNormalVel - mVelocity) * alignmentAmt);
+	//separation
+	mCurrentForce += averageDiff * separationAmt;
 }

@@ -53,7 +53,7 @@ protected:
 	float mMaxLifespan = 100.f; // in seconds
 	float mMinLifespan = 20.f;
 
-	float separationAmt = 1.f;
-	float cohesionAmt = 20.f;
-	float alignmentAmt = 10.f;
+	float separationAmt = 15.f;
+	float cohesionAmt = 10.f;
+	float alignmentAmt = 5.f;
 };
