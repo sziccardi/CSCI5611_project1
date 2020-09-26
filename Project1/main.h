@@ -55,8 +55,8 @@ unsigned char keyStates[256] = { 0 };
 int framesSinceLast = 0;
 long lastTimeSecond = 0;
 
-Vec3 cameraPos = Vec3(0.0f, 250.0f, 300.0f);
-Vec3 cameraFront = Vec3(0.f, -1.0f, -5.0f);
+Vec3 cameraPos = Vec3(200.0f, 50.0f, 200.0f);
+Vec3 cameraFront = Vec3(0.f, -1.0f, 5.0f);
 Vec3 cameraUp = Vec3(0.0f, 1.0f, 0.0f);
 Vec2 mouseAngles = Vec2(0, 0);
 
@@ -192,6 +192,7 @@ unsigned int particleTexture; //https://www.pinpng.com/search/sparkle/
 float mFlockRadius = 50.f;
 float mParticleMaxVelocity = 50.f;
 float separationAmt = 0.1f;
+float obstacleAvoidAmt = 30000.f;
 
 void initParticles();
 void makeParticles();

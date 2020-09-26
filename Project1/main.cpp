@@ -426,7 +426,6 @@ void updateParticles(float dt) {
                 }
             }
 
-            a->update(dt);
             if (!a->getIsFlocking()) {
                 checkForParticleInteractions(a); //TODO: does this need to be before the moving?
                 a->addForce(mGravity);
@@ -434,6 +433,7 @@ void updateParticles(float dt) {
             checkForGroundInteraction(a);
             checkForObstacleInteraction(a);
             checkForExplosion(a);
+            a->update(dt);
 
             ++it;
         }
@@ -474,57 +474,71 @@ void checkForGroundInteraction(Particle* p) {
 
 void checkForObstacleInteraction(Particle* p) {
     for (auto obs : mObstacles) {
-        Vec3 diff = toVec3(p->getCurrentPos() - obs->getCurrentPos());
-        float yLim = p->getRadius() + obs->getCurrentSize().y() / 2;
-        float xLim = p->getRadius() + obs->getCurrentSize().x() / 2;
-        float zLim = p->getRadius() + obs->getCurrentSize().z() / 2;
-        if (abs(diff.x()) < abs(xLim) &&
-            abs(diff.y()) < abs(yLim) &&
-            abs(diff.z()) < abs(zLim))
-        {
-            //cout << "BOUNCE" << endl;
-            //collision!
-            if (abs(diff.x()) > abs(diff.y()) && abs(diff.x()) > abs(diff.z())) {
-                //hitting in the x direction
-                if (diff.x() < 0) {
-                    //from the left
-                    float amtToMove = abs((p->getCurrentPos().x() + p->getRadius()) - (obs->getCurrentPos().x() - obs->getCurrentSize().x() / 2));
-                    p->reflectOffOf(Vec3(-1.f, 0.f, 0.f), amtToMove);
-                }
-                else {
-                    // from the right
-                    float amtToMove = abs((p->getCurrentPos().x() - p->getRadius()) - (obs->getCurrentPos().x() + obs->getCurrentSize().x() / 2));
-                    p->reflectOffOf(Vec3(-1.f, 0.f, 0.f), amtToMove);
-                }
+        if (p->getIsFlocking()) {
+            Vec3 v = toVec3(obs->getCurrentPos() + obs->getCurrentSize() * 0.5f);
+            Vec3 pPos = p->getCurrentPos();
+            auto diff = toVec3(v - pPos);
+            float maxRadius = max(obs->getCurrentSize().x() * 0.5f, obs->getCurrentSize().z() * 0.5f);
+            //maxRadius = max(maxRadius, obs->getCurrentSize().z() * 0.5f);
+            if (diff.length() < mFlockRadius + maxRadius) {
+                diff.setToLength(obstacleAvoidAmt / ((diff.length() - maxRadius)* (diff.length() - maxRadius)));
+                cout << "adding force " << diff.length() << endl;
+                p->addForce(toVec3(diff * -1));
             }
-            else if (abs(diff.y()) > abs(diff.x()) && abs(diff.y()) > abs(diff.z())) {
-                //hitting in the y direction
-                if (diff.y() < 0) {
-                    //from the underside
-                    float amtToMove = abs((p->getCurrentPos().y() + p->getRadius()) - (obs->getCurrentPos().y() - obs->getCurrentSize().y() / 2));
-                    p->reflectOffOf(Vec3(0.f, -1.f, 0.f), amtToMove);
+        }
+        else {
+            Vec3 diff = toVec3(p->getCurrentPos() - obs->getCurrentPos());
+            float yLim = p->getRadius() + obs->getCurrentSize().y() / 2;
+            float xLim = p->getRadius() + obs->getCurrentSize().x() / 2;
+            float zLim = p->getRadius() + obs->getCurrentSize().z() / 2;
+            if (abs(diff.x()) < abs(xLim) &&
+                abs(diff.y()) < abs(yLim) &&
+                abs(diff.z()) < abs(zLim))
+            {
+                //cout << "BOUNCE" << endl;
+                //collision!
+                if (abs(diff.x()) > abs(diff.y()) && abs(diff.x()) > abs(diff.z())) {
+                    //hitting in the x direction
+                    if (diff.x() < 0) {
+                        //from the left
+                        float amtToMove = abs((p->getCurrentPos().x() + p->getRadius()) - (obs->getCurrentPos().x() - obs->getCurrentSize().x() / 2));
+                        p->reflectOffOf(Vec3(-1.f, 0.f, 0.f), amtToMove);
+                    }
+                    else {
+                        // from the right
+                        float amtToMove = abs((p->getCurrentPos().x() - p->getRadius()) - (obs->getCurrentPos().x() + obs->getCurrentSize().x() / 2));
+                        p->reflectOffOf(Vec3(-1.f, 0.f, 0.f), amtToMove);
+                    }
                 }
-                else {
-                    // from the top
-                    float amtToMove = abs((p->getCurrentPos().y() - p->getRadius()) - (obs->getCurrentPos().y() + obs->getCurrentSize().y() / 2));
-                    p->reflectOffOf(Vec3(0.f, 1.f, 0.f), amtToMove);
+                else if (abs(diff.y()) > abs(diff.x()) && abs(diff.y()) > abs(diff.z())) {
+                    //hitting in the y direction
+                    if (diff.y() < 0) {
+                        //from the underside
+                        float amtToMove = abs((p->getCurrentPos().y() + p->getRadius()) - (obs->getCurrentPos().y() - obs->getCurrentSize().y() / 2));
+                        p->reflectOffOf(Vec3(0.f, -1.f, 0.f), amtToMove);
+                    }
+                    else {
+                        // from the top
+                        float amtToMove = abs((p->getCurrentPos().y() - p->getRadius()) - (obs->getCurrentPos().y() + obs->getCurrentSize().y() / 2));
+                        p->reflectOffOf(Vec3(0.f, 1.f, 0.f), amtToMove);
+                    }
                 }
-            }
-            else if (abs(diff.z()) > abs(diff.x()) && abs(diff.z()) > abs(diff.y())) {
-                //hitting in the z direction
-                if (diff.z() < 0) {
-                    //from the back
-                    float amtToMove = abs((p->getCurrentPos().z() + p->getRadius()) - (obs->getCurrentPos().z() - obs->getCurrentSize().z() / 2));
-                    p->reflectOffOf(Vec3(0.f, 0.f, -1.f), amtToMove);
-                }
-                else {
-                    // from the frpnt
-                    float amtToMove = abs((p->getCurrentPos().z() - p->getRadius()) - (obs->getCurrentPos().z() + obs->getCurrentSize().z() / 2));
-                    p->reflectOffOf(Vec3(0.f, 0.f, 1.f), amtToMove);
+                else if (abs(diff.z()) > abs(diff.x()) && abs(diff.z()) > abs(diff.y())) {
+                    //hitting in the z direction
+                    if (diff.z() < 0) {
+                        //from the back
+                        float amtToMove = abs((p->getCurrentPos().z() + p->getRadius()) - (obs->getCurrentPos().z() - obs->getCurrentSize().z() / 2));
+                        p->reflectOffOf(Vec3(0.f, 0.f, -1.f), amtToMove);
+                    }
+                    else {
+                        // from the frpnt
+                        float amtToMove = abs((p->getCurrentPos().z() - p->getRadius()) - (obs->getCurrentPos().z() + obs->getCurrentSize().z() / 2));
+                        p->reflectOffOf(Vec3(0.f, 0.f, 1.f), amtToMove);
+                    }
                 }
             }
         }
-    }
+    }    
 }
 
 void checkForExplosion(Particle* p) {
@@ -667,9 +681,9 @@ void display() {
 
 void initGL() {
     glutInitDisplayMode(GLUT_DOUBLE);
-    glutInitWindowSize(640, 480);
+    glutInitWindowSize(908, 640);
     glutInitWindowPosition(50, 50);
-    glutCreateWindow("Project 1");
+    glutCreateWindow("5611 Project 1 - Ziccardi & Stoffel");
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
