@@ -183,7 +183,7 @@ float particleVertices[] = {
 std::vector<Particle*> mParticles;
 std::vector<Particle*> mNewParticles;
 int mMaxNumParticles = 1500;
-int mNumParticleBurst = 2;
+int mNumParticleBurst = 1;
 float mParticleRadius = 2.f;
 Vec3 mGravity = Vec3(0.f, -50.f, 0.f);
 unsigned int particleVBO, particleVAO;
@@ -222,4 +222,4 @@ void keyOperations(void);
 /* Animation */
 float mExplosionForce = 100.f;
 float mExplosionDistance = 400.f;
-int mNumParticlesToExplode = 10.f;
+int mNumParticlesToExplode = 5.f;
