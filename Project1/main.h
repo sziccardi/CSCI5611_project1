@@ -52,6 +52,9 @@ using namespace std::chrono;
 
 unsigned char keyStates[256] = { 0 };
 
+int framesSinceLast = 0;
+long lastTimeSecond = 0;
+
 Vec3 cameraPos = Vec3(0.0f, 250.0f, 300.0f);
 Vec3 cameraFront = Vec3(0.f, -1.0f, -5.0f);
 Vec3 cameraUp = Vec3(0.0f, 1.0f, 0.0f);
@@ -179,7 +182,7 @@ float particleVertices[] = {
 };
 std::vector<Particle*> mParticles;
 std::vector<Particle*> mNewParticles;
-int mMaxNumParticles = 365;
+int mMaxNumParticles = 1500;
 int mNumParticleBurst = 2;
 float mParticleRadius = 2.f;
 Vec3 mGravity = Vec3(0.f, -50.f, 0.f);

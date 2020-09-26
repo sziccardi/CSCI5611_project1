@@ -77,7 +77,7 @@ void mouse(int button, int state, int x, int y) {
     else {  // normal button event
         // Mouse click, spawn particles
         makeParticles();
-        printf("Button %s At %d %d\n", (state == GLUT_DOWN) ? "Down" : "Up", x, y);
+        //printf("Button %s At %d %d\n", (state == GLUT_DOWN) ? "Down" : "Up", x, y);
     }
 }
 
@@ -89,6 +89,7 @@ void initGroundPlane() {
     glCheckError();
 
     glBindVertexArray(groundVAO);
+
     glCheckError();
 
     glBindBuffer(GL_ARRAY_BUFFER, groundVBO);
@@ -645,6 +646,18 @@ void display() {
 
 
     glutSwapBuffers();
+
+    int numParticles = mParticles.size();
+
+    framesSinceLast++;
+    long deltaTime = glutGet(GLUT_ELAPSED_TIME);
+
+    if (deltaTime - lastTimeSecond > 1000) {
+        int fps = (int)(framesSinceLast * 1000.0 / (deltaTime - lastTimeSecond));
+        lastTimeSecond = deltaTime;
+        framesSinceLast = 0;
+        cout << "FPS: " << fps << "\t Particles: " << numParticles << endl;
+    }
     //auto stop = high_resolution_clock::now();
     //auto duration = duration_cast<microseconds>(stop - start);
 
@@ -692,10 +705,12 @@ void animLoop(int val) {
     keyOperations();
 
     updateParticles(deltaTime);
-
+    framesSinceLast += 1;
     glutPostRedisplay();
     glutTimerFunc(16, animLoop, 1);
 }
+
+
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
@@ -718,6 +733,7 @@ int main(int argc, char** argv) {
     glutMouseFunc(mouse);
 
     glutTimerFunc(1, animLoop, 1);
+    
     glCheckError();
     glutMainLoop();
 
