@@ -58,7 +58,7 @@ void keyOperations(void) {
     cameraFront.normalize();// maybe not necessary
 
     if (keyStates[' ']) {
-        cameraPos += toVec3(cameraFront * dCam * 100.f);
+        cameraPos += toVec3(cameraFront * dCam * cameraSpeedScale);
         if (cameraPos.y() < mGroundPlanePos + 5.f) {
             cameraPos.setVal(1, 0, mGroundPlanePos + 5.f);
         }
@@ -401,7 +401,7 @@ void updateParticles(float dt) {
                 Vec3 averageVel = a->getCurrentVelocity();
                 int neighborCount = 0;
                 for (auto b : mParticles) {
-                    if (b != a &&
+                    if (b != a && b->getIsFlocking() &&
                         toVec3(b->getCurrentPos() - a->getCurrentPos()).length() < mFlockRadius)
                     {
                         //we are neighbors!
@@ -538,9 +538,10 @@ void checkForExplosion(Particle* p) {
 
             auto myP = new Particle(p->getCurrentPos(), vel, mParticleRadius / 2, Vec3(0.f, 0.f, 0.f));
             myP->setIsFlocking(false);
-            myP->setLifespan(3.f);
+            myP->setLifespan(5.f);
             mNewParticles.push_back(myP);
         }
+        p->setIsAlive(false);
     }
 }
 

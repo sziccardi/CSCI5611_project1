@@ -17,7 +17,6 @@ public:
 	Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color);
 
 	glm::mat4 draw(Vec3 cameraFront);
-	glm::mat4 Particle::draw(Vec3 cameraFront, Vec3 cameraRight, Vec3 cameraUp);
 	void moveTo(Vec3 newPos);
 	void shift(Vec3 deltaPos);
 	void setColor(Vec3 color);
@@ -33,6 +32,7 @@ public:
 	float getAge();
 	Vec3 getCurrentVelocity();
 	bool getIsAlive();
+	void setIsAlive(bool alive) { mIsDead = !alive; }
 	float getFadeOn() { return mFadeOn; }
 	bool getIsFlocking() { return mIsFlocking; }
 	void setIsFlocking(bool flock) { mIsFlocking = flock; }

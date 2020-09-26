@@ -62,6 +62,7 @@ float vertical = 0.0f;
 
 float cameraDepth = 10000.f;
 float cameraSpeed = 5.f;
+float cameraSpeedScale = 100.f;
 float moveMult = 5.0f;
 float mouseSpeed = 0.0f;
 
@@ -219,4 +220,4 @@ void keyOperations(void);
 /* Animation */
 float mExplosionForce = 100.f;
 float mExplosionDistance = 400.f;
-int mNumParticlesToExplode = 10.f;
+int mNumParticlesToExplode = 25.f;

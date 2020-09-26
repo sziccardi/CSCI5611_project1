@@ -33,40 +33,6 @@ glm::mat4 Particle::draw(Vec3 cameraPos) {
 	return model;
 }
 
-glm::mat4 Particle::draw(Vec3 cameraFront, Vec3 cameraRight, Vec3 cameraUp) {
-	float camMat[3][3] = { {cameraFront.x(), cameraRight.x(), cameraUp.x()},
-							{cameraFront.y(), cameraRight.y(), cameraUp.y()},
-							{cameraFront.z(), cameraRight.z(), cameraUp.z()} };
-	
-	Vec3 quadPos = Vec3(0.f, 0.f, mCurrentNormal.dot(mPosition) / mCurrentNormal.z());
-	Vec3 quadRight = toVec3(quadPos - mPosition);
-	quadRight.normalize();
-	Vec3 quadUp = quadRight.cross(mCurrentNormal);
-	quadUp.normalize();
-	float quadMat[3][3] = { {mCurrentNormal.x(), quadRight.x(), quadUp.x()},
-							{mCurrentNormal.y(), quadRight.y(), quadUp.y()},
-							{mCurrentNormal.z(), quadRight.z(), quadUp.z()} };
-
-	float camMatInv[3][3] = { {(cameraRight.y() * cameraUp.z() - cameraUp.y() * cameraRight.z()),
-								-(cameraRight.x() * cameraUp.z() - cameraUp.x() * cameraRight.z()),
-								(cameraRight.x() * cameraUp.y() - cameraUp.x() * cameraRight.y()) },
-
-								{-(mCurrentNormal.y() * cameraUp.z() - cameraUp.y() * mCurrentNormal.z()),
-								(mCurrentNormal.x() * cameraUp.z() - cameraUp.x() * mCurrentNormal.z()),
-								-(mCurrentNormal.x() * cameraUp.y() - cameraUp.x() * mCurrentNormal.y()) },
-
-								{(mCurrentNormal.y() * cameraFront.z() - cameraFront.y() * mCurrentNormal.z()),
-								-(mCurrentNormal.x() * cameraFront.z() - cameraFront.x() * mCurrentNormal.z()),
-								(mCurrentNormal.x() * cameraFront.y() - cameraFront.x() * mCurrentNormal.y()) } };
-	float det = cameraFront.x() * (cameraRight.y() * cameraUp.z() - cameraUp.y() * cameraRight.z()) + 
-				cameraRight.x() * (-(cameraFront.y() * cameraUp.z() - cameraFront.z() * cameraUp.y())) + 
-				cameraUp.z() * (cameraFront.x() * cameraRight.z() - cameraRight.y() * cameraFront.z());
-
-
-
-	return glm::mat4();
-}
-
 void Particle::moveTo(Vec3 newPos)
 {
 	//TODO: probably want to smooth out this transition a bit
