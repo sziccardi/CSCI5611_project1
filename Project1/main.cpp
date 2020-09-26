@@ -59,6 +59,9 @@ void keyOperations(void) {
 
     if (keyStates[' ']) {
         cameraPos += toVec3(cameraFront * dCam * 100.f);
+        if (cameraPos.y() < mGroundPlanePos + 5.f) {
+            cameraPos.setVal(1, 0, mGroundPlanePos + 5.f);
+        }
     }
 
     //cout << cameraPos.toString() << endl;
@@ -130,7 +133,7 @@ void initParticles() {
     glEnableVertexAttribArray(1);
     glCheckError();
     // load image, create texture and generate mipmaps
-    particleTexture = loadTexture("testTexture.png");
+    particleTexture = loadTexture("glowTexture.png");
     glCheckError();
     linkTexture();
     glCheckError();
@@ -364,7 +367,7 @@ void drawGroundPlane() {
     // render boxes
     glBindVertexArray(buildingVAO);
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::scale(model, glm::vec3(mGroundPlaneSize * 2, 1.f, mGroundPlaneSize * 2));
+    model = glm::scale(model, glm::vec3(mGroundPlaneSize * BUILDING_GRID_COL, 1.f, mGroundPlaneSize * BUILDING_GRID_ROW));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
     glCheckError();
 
@@ -535,6 +538,7 @@ void checkForExplosion(Particle* p) {
 
             auto myP = new Particle(p->getCurrentPos(), vel, mParticleRadius / 2, Vec3(0.f, 0.f, 0.f));
             myP->setIsFlocking(false);
+            myP->setLifespan(3.f);
             mNewParticles.push_back(myP);
         }
     }

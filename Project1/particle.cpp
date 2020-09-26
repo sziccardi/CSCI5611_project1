@@ -2,7 +2,7 @@
 
 Particle::Particle() :
 	mPosition(Vec3(0.f, 0.f, 0.f)), mRadius(0.f), mColor(Vec3(0.f, 0.f, 0.f)), mCurrentForce(Vec3(0.f, 0.f, 0.f)),
-	mLifespan(0.f), mAge(0.f), mIsDying(false), mIsDead(false), mCurrentRot(Vec3(0.f, 0.f, 0.f)), mFadeOn(0.f)
+	mLifespan(0.f), mAge(0.f), mIsDying(false), mIsDead(false), mCurrentNormal(Vec3(0.f, 0.f, 0.f)), mFadeOn(0.f)
 { }
 
 Particle::Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color) :
@@ -10,7 +10,7 @@ Particle::Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color) :
 	mAge(0.f), mIsDying(false), mIsDead(false)
 { 
 	mLifespan = rand() % (int)(mMaxLifespan - mMinLifespan) + mMinLifespan;
-	mCurrentRot = Vec3(0.f, 1.f, 0.f);
+	mCurrentNormal = Vec3(0.f, 1.f, 0.f);
 	mFadeOn = 3.f;
 }
 
@@ -20,20 +20,51 @@ glm::mat4 Particle::draw(Vec3 cameraPos) {
 	
 	glm::vec3 newPos = glm::vec3(mPosition.x(), mPosition.y(), mPosition.z());
 	glm::vec3 newSize = glm::vec3(2 * mRadius);
-	//TODO: fix billboarding
+	//billboarding
 	Vec3 goalNorm = toVec3(toVec3(cameraPos - mPosition).normalized());
-	Vec3 oldCameraRot = mCurrentRot;
-	Vec3 cameraRotVec = toVec3(goalNorm.cross(oldCameraRot).normalized() * -1);
-	float dot = goalNorm.dot(oldCameraRot);
+	Vec3 cameraRotVec = toVec3(goalNorm.cross(mCurrentNormal).normalized() * -1);
+	float dot = goalNorm.dot(mCurrentNormal);
 	float cameraRotAmt = acos(dot); //normalized so lengths are 1
 
-	model = glm::rotate(model, cameraRotAmt, glm::vec3(cameraRotVec.x(), cameraRotVec.y(), cameraRotVec.z()));
 	model = glm::translate(model, newPos);
 	model = glm::scale(model, newSize); 
+	model = glm::rotate(model, cameraRotAmt, glm::vec3(cameraRotVec.x(), cameraRotVec.y(), cameraRotVec.z()));
 	
-	mCurrentRot = goalNorm;
-	//cout << "acos( " << dot << " ) = " << cameraRotAmt << endl;
 	return model;
+}
+
+glm::mat4 Particle::draw(Vec3 cameraFront, Vec3 cameraRight, Vec3 cameraUp) {
+	float camMat[3][3] = { {cameraFront.x(), cameraRight.x(), cameraUp.x()},
+							{cameraFront.y(), cameraRight.y(), cameraUp.y()},
+							{cameraFront.z(), cameraRight.z(), cameraUp.z()} };
+	
+	Vec3 quadPos = Vec3(0.f, 0.f, mCurrentNormal.dot(mPosition) / mCurrentNormal.z());
+	Vec3 quadRight = toVec3(quadPos - mPosition);
+	quadRight.normalize();
+	Vec3 quadUp = quadRight.cross(mCurrentNormal);
+	quadUp.normalize();
+	float quadMat[3][3] = { {mCurrentNormal.x(), quadRight.x(), quadUp.x()},
+							{mCurrentNormal.y(), quadRight.y(), quadUp.y()},
+							{mCurrentNormal.z(), quadRight.z(), quadUp.z()} };
+
+	float camMatInv[3][3] = { {(cameraRight.y() * cameraUp.z() - cameraUp.y() * cameraRight.z()),
+								-(cameraRight.x() * cameraUp.z() - cameraUp.x() * cameraRight.z()),
+								(cameraRight.x() * cameraUp.y() - cameraUp.x() * cameraRight.y()) },
+
+								{-(mCurrentNormal.y() * cameraUp.z() - cameraUp.y() * mCurrentNormal.z()),
+								(mCurrentNormal.x() * cameraUp.z() - cameraUp.x() * mCurrentNormal.z()),
+								-(mCurrentNormal.x() * cameraUp.y() - cameraUp.x() * mCurrentNormal.y()) },
+
+								{(mCurrentNormal.y() * cameraFront.z() - cameraFront.y() * mCurrentNormal.z()),
+								-(mCurrentNormal.x() * cameraFront.z() - cameraFront.x() * mCurrentNormal.z()),
+								(mCurrentNormal.x() * cameraFront.y() - cameraFront.x() * mCurrentNormal.y()) } };
+	float det = cameraFront.x() * (cameraRight.y() * cameraUp.z() - cameraUp.y() * cameraRight.z()) + 
+				cameraRight.x() * (-(cameraFront.y() * cameraUp.z() - cameraFront.z() * cameraUp.y())) + 
+				cameraUp.z() * (cameraFront.x() * cameraRight.z() - cameraRight.y() * cameraFront.z());
+
+
+
+	return glm::mat4();
 }
 
 void Particle::moveTo(Vec3 newPos)

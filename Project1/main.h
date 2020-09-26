@@ -41,7 +41,7 @@ GLenum glCheckError_(const char* file, int line)
 
 #define M_PI 3.14159265358979323846
 #define BUILDING_GRID_ROW 10
-#define BUILDING_GRID_COL 10
+#define BUILDING_GRID_COL 2
 
 using namespace std::chrono;
 
@@ -154,14 +154,14 @@ void drawObstacles();
 /*Ground plane related things*/
 float groundVertices[] = {
          0.f,  0.f,  0.f,  0.0f, 0.0f,
-         1.f,  0.f,  0.f,  10.0f, 0.0f,
-         1.f,  0.f,  1.f,  10.0f, 10.0f,
-         1.f,  0.f,  1.f,  10.0f, 10.0f,
-         0.f,  0.f,  1.f,  0.0f, 10.0f,
+         1.f,  0.f,  0.f,  BUILDING_GRID_COL, 0.0f,
+         1.f,  0.f,  1.f,  BUILDING_GRID_COL, BUILDING_GRID_ROW,
+         1.f,  0.f,  1.f,  BUILDING_GRID_COL, BUILDING_GRID_ROW,
+         0.f,  0.f,  1.f,  0.0f, BUILDING_GRID_ROW,
          0.f,  0.f,  0.f,  0.0f, 0.0f
 };
 float mGroundPlanePos = -1.f;
-float mGroundPlaneSize = 1000.f;
+float mGroundPlaneSize = 200.f;
 unsigned int groundVBO, groundVAO;
 unsigned int groundTexture;
 
@@ -180,7 +180,7 @@ float particleVertices[] = {
 std::vector<Particle*> mParticles;
 std::vector<Particle*> mNewParticles;
 int mMaxNumParticles = 365;
-int mNumParticleBurst = 5;
+int mNumParticleBurst = 2;
 float mParticleRadius = 2.f;
 Vec3 mGravity = Vec3(0.f, -50.f, 0.f);
 unsigned int particleVBO, particleVAO;
@@ -218,5 +218,5 @@ void keyOperations(void);
 
 /* Animation */
 float mExplosionForce = 100.f;
-float mExplosionDistance = 300.f;
+float mExplosionDistance = 400.f;
 int mNumParticlesToExplode = 10.f;

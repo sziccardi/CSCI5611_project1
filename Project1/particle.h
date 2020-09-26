@@ -17,6 +17,7 @@ public:
 	Particle(Vec3 initPos, Vec3 initVel, float radius, Vec3 color);
 
 	glm::mat4 draw(Vec3 cameraFront);
+	glm::mat4 Particle::draw(Vec3 cameraFront, Vec3 cameraRight, Vec3 cameraUp);
 	void moveTo(Vec3 newPos);
 	void shift(Vec3 deltaPos);
 	void setColor(Vec3 color);
@@ -39,8 +40,8 @@ public:
 	void update(float dt);
 	void reflectOffOf(Vec3 normal, float amtToMove);
 	void flock(Vec3 averageNormalVel, Vec3 averagePos);
-	Vec3 getCurrentRot() { return mCurrentRot; }
-	void setCurrentRot(Vec3 newDir) { mCurrentRot = newDir; }
+	Vec3 getCurrentRot() { return mCurrentNormal; }
+	void setCurrentRot(Vec3 newDir) { mCurrentNormal = newDir; }
 
 protected:
 	Vec3 mPosition;
@@ -48,7 +49,7 @@ protected:
 	Vec3 mCurrentForce;
 	Vec3 mColor; // maybe turn this into a texture?
 	float mRadius;
-	Vec3 mCurrentRot;
+	Vec3 mCurrentNormal;
 
 	float mLifespan;
 	float mFadeOn;
