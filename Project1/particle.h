@@ -61,7 +61,7 @@ protected:
 	float mMaxLifespan = 20.0f; // in seconds
 	float mMinLifespan = 5.0f;
 
-	float cohesionAmt = 1.f;
+	float cohesionAmt = 2.f;
 	float alignmentAmt = 5.f;
 
 	bool mIsFlocking = true;

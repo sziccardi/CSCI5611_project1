@@ -152,7 +152,7 @@ void makeParticles() {
         float amt = (float)(rand() % 50 + 10.f);
 
         Vec3 particleVel = toVec3(cameraFront.normalized() * mParticleMaxVelocity);
-        int randomness = 2;
+        int randomness = 5;
         float adjustXVel = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
         float adjustYVel = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
         float adjustZVel = (float)(rand() % randomness * ((rand() % 2) * 2 - 1));
@@ -381,8 +381,12 @@ void drawGroundPlane() {
 
 /*MOTION*/
 void updateParticles(float dt) {
-    for (auto it : mNewParticles) {
-        mParticles.push_back(it);
+    auto cit = begin(mNewParticles);
+    while (cit != end(mNewParticles)) {
+        //for (auto it : mNewParticles) {
+            mParticles.push_back((*cit));
+            cit = mNewParticles.erase(cit);
+       // }
     }
     mNewParticles.clear();
 
@@ -402,15 +406,16 @@ void updateParticles(float dt) {
                 Vec3 averageVel = a->getCurrentVelocity();
                 int neighborCount = 0;
                 for (auto b : mParticles) {
+                    Vec3 diff = toVec3(toVec3(a->getCurrentPos() - b->getCurrentPos()));
                     if (b != a && b->getIsFlocking() &&
-                        toVec3(b->getCurrentPos() - a->getCurrentPos()).length() < mFlockRadius)
+                        diff.length() < mFlockRadius)
                     {
                         //we are neighbors!
 
                         //separation
-                        Vec3 diff = toVec3(toVec3(a->getCurrentPos() - b->getCurrentPos()).normalized());
-                        diff.setToLength(separationAmt / diff.lengthSqr());
-                        a->addForce(diff);
+                        Vec3 newDiff = toVec3(diff.normalized());
+                        newDiff.setToLength(separationAmt / diff.lengthSqr());
+                        a->addForce(newDiff);
                         //tally for attraction
                         averagePos += b->getCurrentPos();
                         //tally for alignment
@@ -475,17 +480,17 @@ void checkForGroundInteraction(Particle* p) {
 void checkForObstacleInteraction(Particle* p) {
     for (auto obs : mObstacles) {
         if (p->getIsFlocking()) {
-            Vec3 v = toVec3(obs->getCurrentPos() + obs->getCurrentSize() * 0.5f);
-            Vec3 pPos = p->getCurrentPos();
-            auto diff = toVec3(v - pPos);
-            float maxRadius = max(obs->getCurrentSize().x() * 0.5f, obs->getCurrentSize().z() * 0.5f);
-            //maxRadius = max(maxRadius, obs->getCurrentSize().z() * 0.5f);
-            if (diff.length() < mFlockRadius + maxRadius) {
-                diff.setToLength(obstacleAvoidAmt / ((diff.length() - maxRadius)* (diff.length() - maxRadius)));
-                cout << "adding force " << diff.length() << endl;
-                p->addForce(toVec3(diff * -1));
+            Vec3 diff = Vec3(p->getCurrentPos().x() - obs->getCurrentPos().x(), 0.f, p->getCurrentPos().z() - obs->getCurrentPos().z());
+            float rad = sqrt((obs->getCurrentSize().x() / 2) * (obs->getCurrentSize().x() / 2) + (obs->getCurrentSize().z() / 2) * (obs->getCurrentSize().z() / 2));
+            float diffLength = diff.length();
+            if (diffLength < rad + mFlockRadius + 100.f) {
+                auto newDiff = diff;
+                float denomonator = max((diffLength - rad), 0.f);
+                //cout << denomonator << endl;
+                newDiff.setToLength(obstacleAvoidAmt / (denomonator * denomonator));
+                p->addForce(newDiff);
             }
-        }
+        }   
         else {
             Vec3 diff = toVec3(p->getCurrentPos() - obs->getCurrentPos());
             float yLim = p->getRadius() + obs->getCurrentSize().y() / 2;

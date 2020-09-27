@@ -189,10 +189,10 @@ float mParticleRadius = 2.f;
 Vec3 mGravity = Vec3(0.f, -50.f, 0.f);
 unsigned int particleVBO, particleVAO;
 unsigned int particleTexture; //https://www.pinpng.com/search/sparkle/
-float mFlockRadius = 50.f;
+float mFlockRadius = 100.f;
 float mParticleMaxVelocity = 50.f;
 float separationAmt = 0.1f;
-float obstacleAvoidAmt = 30000.f;
+float obstacleAvoidAmt = 300.f;
 
 void initParticles();
 void makeParticles();
@@ -223,5 +223,5 @@ void keyOperations(void);
 
 /* Animation */
 float mExplosionForce = 100.f;
-float mExplosionDistance = 400.f;
-int mNumParticlesToExplode = 25.f;
+float mExplosionDistance = 500.f;
+int mNumParticlesToExplode = 35.f;
