@@ -483,12 +483,20 @@ void checkForObstacleInteraction(Particle* p) {
             Vec3 diff = Vec3(p->getCurrentPos().x() - obs->getCurrentPos().x(), 0.f, p->getCurrentPos().z() - obs->getCurrentPos().z());
             float rad = sqrt((obs->getCurrentSize().x() / 2) * (obs->getCurrentSize().x() / 2) + (obs->getCurrentSize().z() / 2) * (obs->getCurrentSize().z() / 2));
             float diffLength = diff.length();
-            if (diffLength < rad + mFlockRadius + 100.f && p->getCurrentPos().z() < obs->getCurrentPos().z() + obs->getCurrentSize().z() / 2 + mFlockRadius + 100.f) {
-                auto newDiff = diff;
-                float denomonator = max((diffLength - rad), 0.f);
-                //cout << denomonator << endl;
-                newDiff.setToLength(obstacleAvoidAmt / (denomonator * denomonator));
-                p->addForce(newDiff);
+            if (diffLength < rad + mFlockRadius + 100.f && p->getCurrentPos().y() < obs->getCurrentPos().y() + obs->getCurrentSize().y() / 2 + mFlockRadius + 100.f) {
+                if (p->getCurrentPos().y() > obs->getCurrentPos().y() + obs->getCurrentSize().y() / 2) {
+                    auto newDiff = Vec3(0.0f, 1.f, 0.f);
+                    float dist = p->getCurrentPos().y() - (obs->getCurrentPos().y() + obs->getCurrentSize().y() / 2);
+                    newDiff.setToLength(obstacleAvoidAmt / (dist * dist));
+                    p->addForce(newDiff);
+                }
+                else {
+                    auto newDiff = diff;
+                    float denomonator = max((diffLength - rad), 0.f);
+                    //cout << denomonator << endl;
+                    newDiff.setToLength(obstacleAvoidAmt / (denomonator * denomonator));
+                    p->addForce(newDiff);
+                }
             }
         }   
         else {
