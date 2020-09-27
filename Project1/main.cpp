@@ -483,7 +483,7 @@ void checkForObstacleInteraction(Particle* p) {
             Vec3 diff = Vec3(p->getCurrentPos().x() - obs->getCurrentPos().x(), 0.f, p->getCurrentPos().z() - obs->getCurrentPos().z());
             float rad = sqrt((obs->getCurrentSize().x() / 2) * (obs->getCurrentSize().x() / 2) + (obs->getCurrentSize().z() / 2) * (obs->getCurrentSize().z() / 2));
             float diffLength = diff.length();
-            if (diffLength < rad + mFlockRadius + 100.f) {
+            if (diffLength < rad + mFlockRadius + 100.f && p->getCurrentPos().z() < obs->getCurrentPos().z() + obs->getCurrentSize().z() / 2 + mFlockRadius + 100.f) {
                 auto newDiff = diff;
                 float denomonator = max((diffLength - rad), 0.f);
                 //cout << denomonator << endl;
